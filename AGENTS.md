@@ -263,6 +263,25 @@ describe('useSheeds', () => {
 
 ## Supabase Patterns
 
+### Database Types (CRITICAL)
+
+**NEVER manually define interfaces for database tables.** Always use the generated types.
+
+```tsx
+// CORRECT - Import from generated types
+import { Database } from '@/types/database.types';
+type User = Database['public']['Tables']['users']['Row'];
+type SheedInsert = Database['public']['Tables']['sheeds']['Insert'];
+
+// WRONG - Don't manually define
+interface User { id: string; ... } // NO!
+```
+
+To regenerate types after migrations:
+```bash
+npm run update-types  # Runs: supabase gen types typescript --local > types/database.types.ts
+```
+
 ### Client Setup
 
 ```tsx

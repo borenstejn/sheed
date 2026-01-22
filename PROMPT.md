@@ -37,9 +37,11 @@ For each task:
 
 ### 5. Verify
 ```bash
-npm test          # All tests pass
-npx expo start    # App starts without crash (if applicable)
+npm run type-check   # TypeScript compiles (tsc --noEmit)
+npm test             # All tests pass
 ```
+
+**IMPORTANT**: Never run `npx expo start` - it blocks forever. Use `npm run type-check` instead.
 
 ### 6. Update Progress
 Append to `progress.txt`:
@@ -66,10 +68,13 @@ SHEED_MVP_COMPLETE
 
 1. **ONE TASK PER ITERATION** - Complete one task fully before moving on
 2. **TEST FIRST** - Always write the failing test before implementation
+   - EXCEPTION: SETUP-01 (bootstrap) - test written AFTER since __tests__ doesn't exist yet
 3. **FOLLOW DEPENDENCIES** - Never start a task with unmet dependencies
 4. **UPDATE PROGRESS** - Always append to progress.txt after each task
 5. **NO SHORTCUTS** - Don't skip tests, don't hardcode, don't leave TODOs
 6. **COMMIT READY** - Code should be production-ready after each task
+7. **NON-INTERACTIVE** - Always use --yes, --no-input flags. Never run blocking commands (npx expo start, npm run dev, etc.)
+8. **NO MANUAL INPUT** - Assume no human is watching. All commands must complete autonomously.
 
 ## Tech Stack Reference
 

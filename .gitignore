@@ -37,6 +37,8 @@ coverage/
 
 # Ralph Wiggum Loop
 ralph.log
+CONTEXT_INJECTION.txt
+progress_archive_*.txt
 
 # Expo
 .expo/

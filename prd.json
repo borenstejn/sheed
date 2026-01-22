@@ -6,11 +6,12 @@
     {
       "id": "SETUP-01",
       "title": "Initialize Expo project with TypeScript",
-      "description": "Create new Expo project with TypeScript template using `npx create-expo-app@latest sheed-app --template blank-typescript`. Configure app.json with app name, slug, and basic settings.",
+      "description": "Create new Expo project with TypeScript template using `npx create-expo-app@latest . --template blank-typescript --yes` (--yes for non-interactive). Configure app.json with app name 'SHEED', slug 'sheed'. Add 'type-check' script to package.json: \"type-check\": \"tsc --noEmit\". EXCEPTION: This is the only task where test is written AFTER implementation since __tests__ folder doesn't exist yet.",
       "phase": "Setup",
       "dependencies": [],
       "passes": false,
-      "testFile": "__tests__/setup/expo-init.test.ts"
+      "testFile": "__tests__/setup/expo-init.test.ts",
+      "notes": "Bootstrap task - test written after implementation"
     },
     {
       "id": "SETUP-02",

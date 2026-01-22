@@ -1,9 +1,17 @@
 ================================================================================
-RALPH WIGGUM CONFIGURATION FOR SHEED
+RALPH WIGGUM CONFIGURATION FOR SHEED - v2.0 (FIXED)
 ================================================================================
 Date: 2026-01-22
 Purpose: Autonomous development loop using Claude Code
 Based on: Geoffrey Huntley's Ralph Wiggum technique (https://ghuntley.com/ralph/)
+
+FIXES in v2.0:
+- Removed blocking 'npx expo start' command (replaced with tsc --noEmit)
+- Added --yes flags for non-interactive CLI commands
+- Added dynamic context injection to reduce token usage
+- Added progress.txt cleanup every 15 iterations
+- Added SETUP-01 bootstrap exception for TDD
+- Added Supabase types generation instructions
 
 Files included:
 - PROMPT.md (Loop prompt)
@@ -55,9 +63,11 @@ For each task:
 
 ### 5. Verify
 ```bash
-npm test          # All tests pass
-npx expo start    # App starts without crash (if applicable)
+npm run type-check   # TypeScript compiles (tsc --noEmit)
+npm test             # All tests pass
 ```
+
+**IMPORTANT**: Never run `npx expo start` - it blocks forever. Use `npm run type-check` instead.
 
 ### 6. Update Progress
 Append to `progress.txt`:
@@ -84,10 +94,13 @@ SHEED_MVP_COMPLETE
 
 1. **ONE TASK PER ITERATION** - Complete one task fully before moving on
 2. **TEST FIRST** - Always write the failing test before implementation
+   - EXCEPTION: SETUP-01 (bootstrap) - test written AFTER since __tests__ doesn't exist yet
 3. **FOLLOW DEPENDENCIES** - Never start a task with unmet dependencies
 4. **UPDATE PROGRESS** - Always append to progress.txt after each task
 5. **NO SHORTCUTS** - Don't skip tests, don't hardcode, don't leave TODOs
 6. **COMMIT READY** - Code should be production-ready after each task
+7. **NON-INTERACTIVE** - Always use --yes, --no-input flags. Never run blocking commands (npx expo start, npm run dev, etc.)
+8. **NO MANUAL INPUT** - Assume no human is watching. All commands must complete autonomously.
 
 ## Tech Stack Reference
 
@@ -139,11 +152,12 @@ FILE: prd.json
     {
       "id": "SETUP-01",
       "title": "Initialize Expo project with TypeScript",
-      "description": "Create new Expo project with TypeScript template using `npx create-expo-app@latest sheed-app --template blank-typescript`. Configure app.json with app name, slug, and basic settings.",
+      "description": "Create new Expo project with TypeScript template using `npx create-expo-app@latest . --template blank-typescript --yes` (--yes for non-interactive). Configure app.json with app name 'SHEED', slug 'sheed'. Add 'type-check' script to package.json: \"type-check\": \"tsc --noEmit\". EXCEPTION: This is the only task where test is written AFTER implementation since __tests__ folder doesn't exist yet.",
       "phase": "Setup",
       "dependencies": [],
       "passes": false,
-      "testFile": "__tests__/setup/expo-init.test.ts"
+      "testFile": "__tests__/setup/expo-init.test.ts",
+      "notes": "Bootstrap task - test written after implementation"
     },
     {
       "id": "SETUP-02",
@@ -391,7 +405,7 @@ FILE: prd.json
     {
       "id": "SHEED-04",
       "title": "Create Edge Function create-sheed",
-      "description": "Create supabase/functions/create-sheed/index.ts. Validate inputs, insert sheed, create 3 chatrooms, send notifications to sheedes.",
+      "description": "Create supabase/functions/create-sheed/index.ts. Validate inputs, insert sheed, create 3 chatrooms, send notifications to sheedés.",
       "phase": "Sheeds",
       "dependencies": ["DB-05"],
       "passes": false,
@@ -418,7 +432,7 @@ FILE: prd.json
     {
       "id": "SHEED-07",
       "title": "Implement accept/decline logic (Sheede view)",
-      "description": "Add accept/decline buttons to Sheed detail for sheedes. Update sheede_1_accepted/sheede_2_accepted. Handle both-accepted state.",
+      "description": "Add accept/decline buttons to Sheed detail for sheedés. Update sheede_1_accepted/sheede_2_accepted. Handle both-accepted state.",
       "phase": "Sheeds",
       "dependencies": ["SHEED-06"],
       "passes": false,
@@ -535,7 +549,7 @@ FILE: prd.json
     {
       "id": "NOTIF-03",
       "title": "Create DB triggers for auto-notifications",
-      "description": "Create supabase/migrations/009_triggers.sql with triggers: new_sheed -> notify sheedes, message_count >= 10 -> notify success, expires_at approaching -> notify warning.",
+      "description": "Create supabase/migrations/009_triggers.sql with triggers: new_sheed -> notify sheedés, message_count >= 10 -> notify success, expires_at approaching -> notify warning.",
       "phase": "Notifications",
       "dependencies": ["NOTIF-02"],
       "passes": false,
@@ -612,6 +626,7 @@ FILE: progress.txt
 - Tech stack: Expo + Supabase + NativeWind
 - TDD approach: RED -> GREEN -> REFACTOR
 
+
 ================================================================================
 FILE: AGENTS.md
 ================================================================================
@@ -624,7 +639,7 @@ FILE: AGENTS.md
 
 ## Project Identity
 
-**SHEED** = Matchmaking app where users ("Sheeders") connect two of their contacts ("Sheedes"). Inspired by the Hebrew word "shidour" (matchmaking).
+**SHEED** = Matchmaking app where users ("Sheeders") connect two of their contacts ("Sheedés"). Inspired by the Hebrew word "shidour" (matchmaking).
 
 **Target**: Gen-Z (18-28), mobile-first, gamified experience.
 
@@ -881,6 +896,25 @@ describe('useSheeds', () => {
 
 ## Supabase Patterns
 
+### Database Types (CRITICAL)
+
+**NEVER manually define interfaces for database tables.** Always use the generated types.
+
+```tsx
+// CORRECT - Import from generated types
+import { Database } from '@/types/database.types';
+type User = Database['public']['Tables']['users']['Row'];
+type SheedInsert = Database['public']['Tables']['sheeds']['Insert'];
+
+// WRONG - Don't manually define
+interface User { id: string; ... } // NO!
+```
+
+To regenerate types after migrations:
+```bash
+npm run update-types  # Runs: supabase gen types typescript --local > types/database.types.ts
+```
+
 ### Client Setup
 
 ```tsx
@@ -1094,6 +1128,7 @@ SLEEP_BETWEEN_ITERATIONS=3
 LOG_FILE="ralph.log"
 PROGRESS_FILE="progress.txt"
 COMPLETION_MARKER="SHEED_MVP_COMPLETE"
+CLEANUP_EVERY_N_ITERATIONS=15  # Summarize progress.txt every N iterations
 
 # State
 ITERATION=0
@@ -1150,6 +1185,30 @@ check_git_changes() {
     return 0  # Has changes
 }
 
+cleanup_progress_file() {
+    # Summarize old entries to prevent context bloat
+    local line_count=$(wc -l < "$PROGRESS_FILE" 2>/dev/null || echo "0")
+
+    if [ "$line_count" -gt 100 ]; then
+        echo ""
+        echo -e "${YELLOW}  Cleaning up progress.txt ($line_count lines -> summary)${NC}"
+
+        # Keep header and last 50 entries, archive the rest
+        local archive_file="progress_archive_$(date '+%Y%m%d_%H%M%S').txt"
+        cp "$PROGRESS_FILE" "$archive_file"
+
+        # Create summarized version
+        head -n 10 "$PROGRESS_FILE" > "${PROGRESS_FILE}.tmp"
+        echo "" >> "${PROGRESS_FILE}.tmp"
+        echo "# [ARCHIVED] Previous entries saved to $archive_file" >> "${PROGRESS_FILE}.tmp"
+        echo "" >> "${PROGRESS_FILE}.tmp"
+        tail -n 50 "$PROGRESS_FILE" >> "${PROGRESS_FILE}.tmp"
+        mv "${PROGRESS_FILE}.tmp" "$PROGRESS_FILE"
+
+        echo -e "${GREEN}  Archived old entries to $archive_file${NC}"
+    fi
+}
+
 auto_commit() {
     local iter=$1
     local timestamp=$(date '+%Y-%m-%d %H:%M')
@@ -1173,10 +1232,31 @@ run_claude() {
     echo "  Running Claude Code..."
     echo ""
 
-    # Pipe PROMPT.md to Claude and capture output
-    cat PROMPT.md | claude --print 2>&1 | tee -a "$LOG_FILE"
+    # Create dynamic context injection
+    cat > CONTEXT_INJECTION.txt << EOF
+# DYNAMIC CONTEXT (Auto-generated by ralph.sh)
+CURRENT_DATE: $(date '+%Y-%m-%d %H:%M')
+ITERATION: $ITERATION / $MAX_ITERATIONS
+LAST_PROGRESS_ENTRIES:
+$(tail -n 10 "$PROGRESS_FILE" 2>/dev/null || echo "No entries yet")
 
-    return ${PIPESTATUS[0]}
+# TASK COMPLETION STATUS:
+$(grep -c '"passes": true' prd.json 2>/dev/null || echo "0") tasks completed out of $(grep -c '"passes":' prd.json 2>/dev/null || echo "49")
+
+---
+EOF
+
+    # Concatenate dynamic context + static prompt and pipe to Claude
+    # --dangerously-skip-permissions allows autonomous execution without Y/N prompts
+    # --print outputs result without interactive mode
+    cat CONTEXT_INJECTION.txt PROMPT.md | claude --print --dangerously-skip-permissions 2>&1 | tee -a "$LOG_FILE"
+
+    local exit_code=${PIPESTATUS[0]}
+
+    # Clean up temp file
+    rm -f CONTEXT_INJECTION.txt
+
+    return $exit_code
 }
 
 print_summary() {
@@ -1279,6 +1359,11 @@ while [ $ITERATION -lt $MAX_ITERATIONS ]; do
         echo -e "${RED}  Human intervention required.${NC}"
         print_summary "STOPPED - Circuit Breaker"
         exit 1
+    fi
+
+    # Periodic cleanup to prevent context bloat
+    if [ $((ITERATION % CLEANUP_EVERY_N_ITERATIONS)) -eq 0 ]; then
+        cleanup_progress_file
     fi
 
     # Rate limiting
