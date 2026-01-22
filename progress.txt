@@ -33,3 +33,19 @@
 Setup phase complete. 8/8 tasks passing.
 Next phase: Authentication (AUTH-01 to AUTH-05)
 
+[2026-01-23 01:00] AUTH-01: Configure Supabase Auth providers
+- Created hooks/useAuth.ts with signInWithGoogle, signInWithApple, signOut
+- Uses expo-auth-session + expo-web-browser for OAuth flow
+- Integrated with authStore (Zustand) for state persistence
+- Updated authStore to use Supabase Auth User type (not database User)
+- Tests pass in __tests__/auth/useAuth.test.ts
+
+[2026-01-23 01:30] AUTH-02 to AUTH-05: Authentication phase complete
+- AUTH-02: Animated splash screen with logo animation, 800ms duration
+- AUTH-03: 3-slide onboarding with animated dots, skip/next buttons
+- AUTH-04: Login screen with Apple/Google SSO, error handling, terms
+- AUTH-05: Permissions screen for contacts + notifications
+
+Authentication phase complete. 5/5 tasks passing.
+Next phase: Contacts (CONTACTS-01 to CONTACTS-04)
+

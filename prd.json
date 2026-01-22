@@ -185,8 +185,10 @@
       "description": "Configure Supabase Auth for Google and Apple OAuth. Create hooks/useAuth.ts with signIn, signOut, getCurrentUser functions.",
       "phase": "Authentication",
       "dependencies": ["DB-02"],
-      "passes": false,
-      "testFile": "__tests__/auth/auth-config.test.ts"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/auth/useAuth.test.ts",
+      "notes": "useAuth hook with Google/Apple OAuth, SecureStore, expo-auth-session"
     },
     {
       "id": "AUTH-02",
@@ -194,8 +196,10 @@
       "description": "Create app/(auth)/splash.tsx with Lottie animation: bow+arrow shooting heart. Duration ~0.8s, auto-navigate to next screen.",
       "phase": "Authentication",
       "dependencies": ["SETUP-03", "SETUP-04"],
-      "passes": false,
-      "testFile": "__tests__/screens/splash.test.tsx"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/screens/splash.test.ts",
+      "notes": "Animated with React Native Animated API, heart emoji + logo, 800ms duration"
     },
     {
       "id": "AUTH-03",
@@ -203,8 +207,10 @@
       "description": "Create app/(auth)/onboarding.tsx with 3 swipeable slides: value prop, social login buttons, permissions request. Use NativeWind styling.",
       "phase": "Authentication",
       "dependencies": ["AUTH-02"],
-      "passes": false,
-      "testFile": "__tests__/screens/onboarding.test.tsx"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/screens/onboarding.test.ts",
+      "notes": "3 slides with animated dots, skip button, horizontal FlatList"
     },
     {
       "id": "AUTH-04",
@@ -212,8 +218,10 @@
       "description": "Create app/(auth)/login.tsx with Apple and Google SSO buttons. Integrate with useAuth hook. Handle auth state and navigation.",
       "phase": "Authentication",
       "dependencies": ["AUTH-01", "AUTH-03"],
-      "passes": false,
-      "testFile": "__tests__/screens/login.test.tsx"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/screens/login.test.ts",
+      "notes": "Apple/Google buttons, loading state, error handling, terms"
     },
     {
       "id": "AUTH-05",
@@ -221,8 +229,10 @@
       "description": "Create app/(auth)/permissions.tsx requesting contacts and notifications permissions. Use expo-contacts and expo-notifications.",
       "phase": "Authentication",
       "dependencies": ["AUTH-04"],
-      "passes": false,
-      "testFile": "__tests__/screens/permissions.test.tsx"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/screens/permissions.test.ts",
+      "notes": "Contacts + notifications permissions with skip option"
     },
     {
       "id": "CONTACTS-01",

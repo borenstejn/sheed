@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User } from '@/types/database.types';
+import type { User } from '@supabase/supabase-js';
 
+// Note: This store holds Supabase Auth User, not our database User profile
+// Use a separate hook/store for the full user profile from our database
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
