@@ -1,0 +1,1316 @@
+================================================================================
+RALPH WIGGUM CONFIGURATION FOR SHEED
+================================================================================
+Date: 2026-01-22
+Purpose: Autonomous development loop using Claude Code
+Based on: Geoffrey Huntley's Ralph Wiggum technique (https://ghuntley.com/ralph/)
+
+Files included:
+- PROMPT.md (Loop prompt)
+- prd.json (49 atomic tasks)
+- progress.txt (Episodic memory)
+- AGENTS.md (Coding conventions)
+- scripts/ralph.sh (Orchestrator)
+
+================================================================================
+FILE: PROMPT.md
+================================================================================
+
+# SHEED Development Loop - Ralph Wiggum Prompt
+
+You are building SHEED, a matchmaking app for Gen-Z. Your task is to implement features according to the task queue in `prd.json`.
+
+## Context Files (READ FIRST)
+
+1. `prd.json` - Task queue with dependencies. Find the next unfinished task.
+2. `progress.txt` - Journal of completed work. Read to understand current state.
+3. `AGENTS.md` - Coding conventions and patterns for this project.
+4. `docs/SHEED-PRD.md` - Complete PRD with SQL schema and API specs.
+5. `docs/SHEED-UI-DESIGN-PROPOSALS.md` - Design system "Dopamine & Neon".
+
+## Your Process (TDD)
+
+For each task:
+
+### 1. Find Next Task
+```bash
+# Read prd.json, find first task where:
+# - passes: false
+# - All dependencies have passes: true
+```
+
+### 2. RED - Write Failing Test First
+- Create test file in `__tests__/` directory
+- Write test that defines expected behavior
+- Run `npm test` - it MUST fail
+
+### 3. GREEN - Minimal Implementation
+- Write the minimum code to make the test pass
+- No extra features, no premature optimization
+- Run `npm test` - it MUST pass
+
+### 4. REFACTOR (if needed)
+- Clean up code while keeping tests green
+- Apply patterns from AGENTS.md
+
+### 5. Verify
+```bash
+npm test          # All tests pass
+npx expo start    # App starts without crash (if applicable)
+```
+
+### 6. Update Progress
+Append to `progress.txt`:
+```
+[YYYY-MM-DD HH:MM] TASK-ID: Short description
+- What was implemented
+- Files created/modified
+- Any blockers or notes
+```
+
+### 7. Update prd.json
+Set the task's `passes` to `true`.
+
+## Completion Marker
+
+When ALL tasks in prd.json have `passes: true` AND the app runs:
+1. Test full flow: Login -> Create Sheed -> Chat -> Stats
+2. Append to `progress.txt`:
+```
+SHEED_MVP_COMPLETE
+```
+
+## Rules
+
+1. **ONE TASK PER ITERATION** - Complete one task fully before moving on
+2. **TEST FIRST** - Always write the failing test before implementation
+3. **FOLLOW DEPENDENCIES** - Never start a task with unmet dependencies
+4. **UPDATE PROGRESS** - Always append to progress.txt after each task
+5. **NO SHORTCUTS** - Don't skip tests, don't hardcode, don't leave TODOs
+6. **COMMIT READY** - Code should be production-ready after each task
+
+## Tech Stack Reference
+
+- **Frontend**: Expo SDK 52+, Expo Router, NativeWind v4, Zustand, TanStack Query
+- **Backend**: Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
+- **Testing**: Jest + React Native Testing Library + Maestro (E2E)
+- **Types**: TypeScript strict mode
+
+## File Structure
+
+```
+sheed/
+├── app/                  # Expo Router screens
+│   ├── (auth)/
+│   ├── (main)/(tabs)/
+│   └── _layout.tsx
+├── components/           # Reusable UI components
+├── hooks/               # Custom React hooks
+├── stores/              # Zustand stores
+├── lib/                 # Utilities, Supabase client
+├── __tests__/           # Jest tests
+├── supabase/
+│   ├── migrations/      # SQL migrations
+│   └── functions/       # Edge Functions
+└── e2e/                 # Maestro E2E tests
+```
+
+## Start Now
+
+1. Read `prd.json` to find next task
+2. Check dependencies
+3. Write failing test
+4. Implement
+5. Verify
+6. Update progress
+7. Update prd.json
+
+Go!
+
+================================================================================
+FILE: prd.json
+================================================================================
+
+{
+  "project": "SHEED",
+  "version": "1.0.0",
+  "description": "Matchmaking app for Gen-Z - Task queue for Ralph Wiggum loop",
+  "tasks": [
+    {
+      "id": "SETUP-01",
+      "title": "Initialize Expo project with TypeScript",
+      "description": "Create new Expo project with TypeScript template using `npx create-expo-app@latest sheed-app --template blank-typescript`. Configure app.json with app name, slug, and basic settings.",
+      "phase": "Setup",
+      "dependencies": [],
+      "passes": false,
+      "testFile": "__tests__/setup/expo-init.test.ts"
+    },
+    {
+      "id": "SETUP-02",
+      "title": "Configure Jest + React Native Testing Library",
+      "description": "Install jest, @testing-library/react-native, jest-expo. Configure jest.config.js with preset 'jest-expo'. Create first sanity test.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/jest-config.test.ts"
+    },
+    {
+      "id": "SETUP-03",
+      "title": "Configure Expo Router with folder structure",
+      "description": "Install expo-router. Create app/ directory with _layout.tsx, (auth)/ group, and (main)/(tabs)/ nested group. Configure navigation scheme in app.json.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/router-config.test.ts"
+    },
+    {
+      "id": "SETUP-04",
+      "title": "Configure NativeWind + tailwind.config.js",
+      "description": "Install nativewind and tailwindcss. Create tailwind.config.js with SHEED color palette (sheed-pink, sheed-purple, etc.). Configure babel.config.js for NativeWind.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-03"],
+      "passes": false,
+      "testFile": "__tests__/setup/nativewind.test.ts"
+    },
+    {
+      "id": "SETUP-05",
+      "title": "Configure Supabase client",
+      "description": "Install @supabase/supabase-js. Create lib/supabase.ts with createClient using env variables. Configure expo-secure-store for auth persistence.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/supabase-client.test.ts"
+    },
+    {
+      "id": "SETUP-06",
+      "title": "Configure Zustand + TanStack Query",
+      "description": "Install zustand and @tanstack/react-query. Create stores/index.ts and hooks/useQueryClient.ts. Wrap app with QueryClientProvider.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/state-management.test.ts"
+    },
+    {
+      "id": "SETUP-07",
+      "title": "Create project folder structure",
+      "description": "Create components/, hooks/, stores/, lib/, __tests__/, e2e/ directories. Add index.ts barrel exports where appropriate.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-03"],
+      "passes": false,
+      "testFile": "__tests__/setup/folder-structure.test.ts"
+    },
+    {
+      "id": "SETUP-08",
+      "title": "Configure Maestro for E2E tests",
+      "description": "Install maestro CLI. Create e2e/ directory with .maestro/ config. Create first sanity flow that opens the app.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-07"],
+      "passes": false,
+      "testFile": "e2e/.maestro/sanity.yaml"
+    },
+    {
+      "id": "DB-01",
+      "title": "Create SQL migrations - ENUM types",
+      "description": "Create supabase/migrations/001_enums.sql with sheed_status, chatroom_type, message_type, notification_type ENUMs as specified in PRD.",
+      "phase": "Database",
+      "dependencies": ["SETUP-05"],
+      "passes": false,
+      "testFile": "__tests__/db/enums.test.ts"
+    },
+    {
+      "id": "DB-02",
+      "title": "Create users table migration",
+      "description": "Create supabase/migrations/002_users.sql with users table including auth_id, profile fields, gamification counters, and indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-01"],
+      "passes": false,
+      "testFile": "__tests__/db/users-table.test.ts"
+    },
+    {
+      "id": "DB-03",
+      "title": "Create contacts table migration",
+      "description": "Create supabase/migrations/003_contacts.sql with contacts table, owner_id FK, contact_user_id FK, unique constraints and indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/db/contacts-table.test.ts"
+    },
+    {
+      "id": "DB-04",
+      "title": "Create sheeds table migration",
+      "description": "Create supabase/migrations/004_sheeds.sql with sheeds table, 3 participant FKs, intro_message, status, expires_at, constraints and indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/db/sheeds-table.test.ts"
+    },
+    {
+      "id": "DB-05",
+      "title": "Create chatrooms table migration",
+      "description": "Create supabase/migrations/005_chatrooms.sql with chatrooms table, sheed_id FK, type ENUM, participant FKs, indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-04"],
+      "passes": false,
+      "testFile": "__tests__/db/chatrooms-table.test.ts"
+    },
+    {
+      "id": "DB-06",
+      "title": "Create messages table migration",
+      "description": "Create supabase/migrations/006_messages.sql with messages table, chatroom_id FK, sender_id FK, content, type, timestamps, indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-05"],
+      "passes": false,
+      "testFile": "__tests__/db/messages-table.test.ts"
+    },
+    {
+      "id": "DB-07",
+      "title": "Create notifications table migration",
+      "description": "Create supabase/migrations/007_notifications.sql with notifications table, user_id FK, type ENUM, title, body, data JSON, read_at.",
+      "phase": "Database",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/db/notifications-table.test.ts"
+    },
+    {
+      "id": "DB-08",
+      "title": "Implement RLS policies for all tables",
+      "description": "Create supabase/migrations/008_rls.sql with Row Level Security policies. Critical: Sheeder cannot read sheede_sheede chatroom messages!",
+      "phase": "Database",
+      "dependencies": ["DB-07"],
+      "passes": false,
+      "testFile": "__tests__/db/rls-policies.test.ts"
+    },
+    {
+      "id": "AUTH-01",
+      "title": "Configure Supabase Auth providers",
+      "description": "Configure Supabase Auth for Google and Apple OAuth. Create hooks/useAuth.ts with signIn, signOut, getCurrentUser functions.",
+      "phase": "Authentication",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/auth/auth-config.test.ts"
+    },
+    {
+      "id": "AUTH-02",
+      "title": "Create animated Splash screen",
+      "description": "Create app/(auth)/splash.tsx with Lottie animation: bow+arrow shooting heart. Duration ~0.8s, auto-navigate to next screen.",
+      "phase": "Authentication",
+      "dependencies": ["SETUP-03", "SETUP-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/splash.test.tsx"
+    },
+    {
+      "id": "AUTH-03",
+      "title": "Create Onboarding screen (3 slides)",
+      "description": "Create app/(auth)/onboarding.tsx with 3 swipeable slides: value prop, social login buttons, permissions request. Use NativeWind styling.",
+      "phase": "Authentication",
+      "dependencies": ["AUTH-02"],
+      "passes": false,
+      "testFile": "__tests__/screens/onboarding.test.tsx"
+    },
+    {
+      "id": "AUTH-04",
+      "title": "Create Login SSO screen",
+      "description": "Create app/(auth)/login.tsx with Apple and Google SSO buttons. Integrate with useAuth hook. Handle auth state and navigation.",
+      "phase": "Authentication",
+      "dependencies": ["AUTH-01", "AUTH-03"],
+      "passes": false,
+      "testFile": "__tests__/screens/login.test.tsx"
+    },
+    {
+      "id": "AUTH-05",
+      "title": "Create Permissions screen",
+      "description": "Create app/(auth)/permissions.tsx requesting contacts and notifications permissions. Use expo-contacts and expo-notifications.",
+      "phase": "Authentication",
+      "dependencies": ["AUTH-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/permissions.test.tsx"
+    },
+    {
+      "id": "CONTACTS-01",
+      "title": "Create useContacts hook for phone access",
+      "description": "Create hooks/useContacts.ts using expo-contacts. Fetch, format, and return contacts with phone/email. Handle permission states.",
+      "phase": "Contacts",
+      "dependencies": ["AUTH-05"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useContacts.test.ts"
+    },
+    {
+      "id": "CONTACTS-02",
+      "title": "Import contacts to Supabase",
+      "description": "Create lib/contactsSync.ts to batch-insert contacts to Supabase. Handle duplicates, normalize phone numbers, sync status.",
+      "phase": "Contacts",
+      "dependencies": ["CONTACTS-01", "DB-03"],
+      "passes": false,
+      "testFile": "__tests__/lib/contactsSync.test.ts"
+    },
+    {
+      "id": "CONTACTS-03",
+      "title": "Match contacts with existing users",
+      "description": "Create lib/contactsMatch.ts to match imported contacts with existing SHEED users by phone/email. Update contact_user_id.",
+      "phase": "Contacts",
+      "dependencies": ["CONTACTS-02"],
+      "passes": false,
+      "testFile": "__tests__/lib/contactsMatch.test.ts"
+    },
+    {
+      "id": "CONTACTS-04",
+      "title": "Create ContactList component with search",
+      "description": "Create components/ContactList.tsx with FlatList, search input, ContactItem subcomponent. Support selection mode with checkmarks.",
+      "phase": "Contacts",
+      "dependencies": ["CONTACTS-02"],
+      "passes": false,
+      "testFile": "__tests__/components/ContactList.test.tsx"
+    },
+    {
+      "id": "SHEED-01",
+      "title": "Create Sheeds list screen with toggle",
+      "description": "Create app/(main)/(tabs)/sheeds.tsx with 'Mes Sheeds' / 'Sheede(e)' toggle. Use animated sliding pill. Empty states.",
+      "phase": "Sheeds",
+      "dependencies": ["SETUP-06", "SETUP-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/sheeds-list.test.tsx"
+    },
+    {
+      "id": "SHEED-02",
+      "title": "Create SheedCard component",
+      "description": "Create components/SheedCard.tsx with glassmorphism style, avatar pair, status badge (pending/active/success), message progress bar.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-01"],
+      "passes": false,
+      "testFile": "__tests__/components/SheedCard.test.tsx"
+    },
+    {
+      "id": "SHEED-03",
+      "title": "Create Sheed creation modal",
+      "description": "Create app/(main)/new-sheed.tsx modal. Two contact selector slots, intro message input, 'Sheed les!' CTA with confetti animation.",
+      "phase": "Sheeds",
+      "dependencies": ["CONTACTS-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/new-sheed.test.tsx"
+    },
+    {
+      "id": "SHEED-04",
+      "title": "Create Edge Function create-sheed",
+      "description": "Create supabase/functions/create-sheed/index.ts. Validate inputs, insert sheed, create 3 chatrooms, send notifications to sheedes.",
+      "phase": "Sheeds",
+      "dependencies": ["DB-05"],
+      "passes": false,
+      "testFile": "__tests__/functions/create-sheed.test.ts"
+    },
+    {
+      "id": "SHEED-05",
+      "title": "Integrate Sheed creation frontend + backend",
+      "description": "Create hooks/useSheeds.ts with createSheed mutation calling Edge Function. Optimistic update, error handling, cache invalidation.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-03", "SHEED-04"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useSheeds.test.ts"
+    },
+    {
+      "id": "SHEED-06",
+      "title": "Create Sheed detail screen (Sheeder view)",
+      "description": "Create app/(main)/sheed/[id].tsx. Show triangle visualization (Sheeder-Sheede1-Sheede2), status card, locked chat preview, individual chat links.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-02"],
+      "passes": false,
+      "testFile": "__tests__/screens/sheed-detail.test.tsx"
+    },
+    {
+      "id": "SHEED-07",
+      "title": "Implement accept/decline logic (Sheede view)",
+      "description": "Add accept/decline buttons to Sheed detail for sheedes. Update sheede_1_accepted/sheede_2_accepted. Handle both-accepted state.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-06"],
+      "passes": false,
+      "testFile": "__tests__/screens/sheed-accept-decline.test.tsx"
+    },
+    {
+      "id": "CHAT-01",
+      "title": "Create Chats list screen",
+      "description": "Create app/(main)/(tabs)/chats.tsx with list of all conversations. Group by sheed context. Show unread badges.",
+      "phase": "Chat",
+      "dependencies": ["SETUP-06"],
+      "passes": false,
+      "testFile": "__tests__/screens/chats-list.test.tsx"
+    },
+    {
+      "id": "CHAT-02",
+      "title": "Create ChatListItem component",
+      "description": "Create components/ChatListItem.tsx with avatar(s), name, last message preview, timestamp, unread count badge, sheeder/sheede indicator.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-01"],
+      "passes": false,
+      "testFile": "__tests__/components/ChatListItem.test.tsx"
+    },
+    {
+      "id": "CHAT-03",
+      "title": "Create Conversation screen",
+      "description": "Create app/(main)/chat/[id].tsx with header (avatar, name, status), message list, input bar. Support for intro message display.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-02"],
+      "passes": false,
+      "testFile": "__tests__/screens/conversation.test.tsx"
+    },
+    {
+      "id": "CHAT-04",
+      "title": "Create ChatBubble component",
+      "description": "Create components/ChatBubble.tsx with gradient for self, neutral for other. Tail-less design, grouped consecutive messages. Timestamp on tap.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-03"],
+      "passes": false,
+      "testFile": "__tests__/components/ChatBubble.test.tsx"
+    },
+    {
+      "id": "CHAT-05",
+      "title": "Create useMessages hook with Supabase Realtime",
+      "description": "Create hooks/useMessages.ts with Supabase Realtime subscription. Auto-scroll on new messages, typing indicators, read receipts.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-03", "DB-06"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useMessages.test.ts"
+    },
+    {
+      "id": "CHAT-06",
+      "title": "Implement message sending with optimistic updates",
+      "description": "Add sendMessage to useMessages. Optimistic insert, Supabase insert, rollback on error. Update message_count in sheeds table.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-05"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useMessages-send.test.ts"
+    },
+    {
+      "id": "PROFILE-01",
+      "title": "Create Profile screen with stats",
+      "description": "Create app/(main)/(tabs)/profile.tsx with avatar, username, stats cards (sheeds created, successful, rate), settings list.",
+      "phase": "Profile",
+      "dependencies": ["SETUP-06"],
+      "passes": false,
+      "testFile": "__tests__/screens/profile.test.tsx"
+    },
+    {
+      "id": "PROFILE-02",
+      "title": "Create StatCard component",
+      "description": "Create components/StatCard.tsx with glassmorphism, large number with animated count-up, label. Support for percentage display.",
+      "phase": "Profile",
+      "dependencies": ["PROFILE-01"],
+      "passes": false,
+      "testFile": "__tests__/components/StatCard.test.tsx"
+    },
+    {
+      "id": "PROFILE-03",
+      "title": "Create useUserStats hook",
+      "description": "Create hooks/useUserStats.ts fetching user stats from Supabase. Calculate success rate, rank among friends.",
+      "phase": "Profile",
+      "dependencies": ["PROFILE-01"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useUserStats.test.ts"
+    },
+    {
+      "id": "PROFILE-04",
+      "title": "Create Settings screen",
+      "description": "Create app/(main)/settings.tsx with notifications toggle, blocked accounts, help, logout. Persist settings to Supabase.",
+      "phase": "Profile",
+      "dependencies": ["PROFILE-01"],
+      "passes": false,
+      "testFile": "__tests__/screens/settings.test.tsx"
+    },
+    {
+      "id": "NOTIF-01",
+      "title": "Configure Expo Push Notifications",
+      "description": "Configure expo-notifications. Request permissions, get push token, store in users.push_token. Handle notification tap navigation.",
+      "phase": "Notifications",
+      "dependencies": ["AUTH-05"],
+      "passes": false,
+      "testFile": "__tests__/notifications/push-config.test.ts"
+    },
+    {
+      "id": "NOTIF-02",
+      "title": "Create Edge Function send-notification",
+      "description": "Create supabase/functions/send-notification/index.ts. Accept user_id, type, title, body. Send via Expo Push API, insert to notifications table.",
+      "phase": "Notifications",
+      "dependencies": ["DB-07"],
+      "passes": false,
+      "testFile": "__tests__/functions/send-notification.test.ts"
+    },
+    {
+      "id": "NOTIF-03",
+      "title": "Create DB triggers for auto-notifications",
+      "description": "Create supabase/migrations/009_triggers.sql with triggers: new_sheed -> notify sheedes, message_count >= 10 -> notify success, expires_at approaching -> notify warning.",
+      "phase": "Notifications",
+      "dependencies": ["NOTIF-02"],
+      "passes": false,
+      "testFile": "__tests__/db/triggers.test.ts"
+    },
+    {
+      "id": "POLISH-01",
+      "title": "Add micro-interaction animations",
+      "description": "Add Lottie/Reanimated animations: confetti on sheed creation, heart bounce on success, badge pulse on new message, button press feedback.",
+      "phase": "Polish",
+      "dependencies": ["SHEED-05", "CHAT-06"],
+      "passes": false,
+      "testFile": "__tests__/animations/micro-interactions.test.ts"
+    },
+    {
+      "id": "POLISH-02",
+      "title": "Write unit tests for all hooks",
+      "description": "Ensure 80%+ coverage on all hooks: useAuth, useContacts, useSheeds, useMessages, useUserStats. Mock Supabase client.",
+      "phase": "Polish",
+      "dependencies": ["CHAT-06", "PROFILE-03"],
+      "passes": false,
+      "testFile": "__tests__/coverage-report.test.ts"
+    },
+    {
+      "id": "POLISH-03",
+      "title": "Create E2E tests with Maestro",
+      "description": "Create Maestro flows: onboarding.yaml, create-sheed.yaml, chat-flow.yaml, profile.yaml. Cover critical user journeys.",
+      "phase": "Polish",
+      "dependencies": ["SETUP-08", "CHAT-06", "PROFILE-01"],
+      "passes": false,
+      "testFile": "e2e/.maestro/full-flow.yaml"
+    },
+    {
+      "id": "POLISH-04",
+      "title": "Build with EAS and test on device",
+      "description": "Configure eas.json for development and preview builds. Run EAS build. Test on physical iOS and Android devices. Fix any platform-specific issues.",
+      "phase": "Polish",
+      "dependencies": ["POLISH-03"],
+      "passes": false,
+      "testFile": "__tests__/build/eas-build.test.ts"
+    }
+  ],
+  "metadata": {
+    "totalTasks": 49,
+    "phases": [
+      {"name": "Setup", "count": 8},
+      {"name": "Database", "count": 8},
+      {"name": "Authentication", "count": 5},
+      {"name": "Contacts", "count": 4},
+      {"name": "Sheeds", "count": 7},
+      {"name": "Chat", "count": 6},
+      {"name": "Profile", "count": 4},
+      {"name": "Notifications", "count": 3},
+      {"name": "Polish", "count": 4}
+    ],
+    "createdAt": "2026-01-22",
+    "completionMarker": "SHEED_MVP_COMPLETE"
+  }
+}
+
+================================================================================
+FILE: progress.txt
+================================================================================
+
+# SHEED Development Progress Log
+# Ralph Wiggum Loop - Episodic Memory
+# =====================================
+# Format: [YYYY-MM-DD HH:MM] TASK-ID: Description
+# Append-only - never delete entries
+# =====================================
+
+[2026-01-22 20:00] INIT: Ralph Wiggum loop initialized for SHEED development
+- 49 tasks defined in prd.json
+- Tech stack: Expo + Supabase + NativeWind
+- TDD approach: RED -> GREEN -> REFACTOR
+
+================================================================================
+FILE: AGENTS.md
+================================================================================
+
+# SHEED - Agent Instructions & Coding Conventions
+
+> Procedural memory for Claude during Ralph Wiggum development loop
+
+---
+
+## Project Identity
+
+**SHEED** = Matchmaking app where users ("Sheeders") connect two of their contacts ("Sheedes"). Inspired by the Hebrew word "shidour" (matchmaking).
+
+**Target**: Gen-Z (18-28), mobile-first, gamified experience.
+
+---
+
+## Tech Stack (DO NOT CHANGE)
+
+| Layer | Technology | Version |
+|-------|------------|---------|
+| Framework | Expo | SDK 52+ |
+| Routing | Expo Router | 4.x |
+| Styling | NativeWind | 4.x |
+| State (local) | Zustand | 4.x |
+| State (server) | TanStack Query | 5.x |
+| Backend | Supabase | Latest |
+| Database | PostgreSQL | 15+ |
+| Language | TypeScript | Strict |
+
+---
+
+## File Naming Conventions
+
+```
+components/Button.tsx        # PascalCase for components
+components/SheedCard.tsx
+hooks/useAuth.ts             # camelCase with 'use' prefix
+hooks/useSheeds.ts
+stores/authStore.ts          # camelCase with 'Store' suffix
+lib/supabase.ts              # camelCase for utilities
+lib/utils.ts
+__tests__/hooks/useAuth.test.ts  # Mirror source structure
+app/(main)/(tabs)/sheeds.tsx # lowercase for routes
+```
+
+---
+
+## Component Structure
+
+```tsx
+// components/SheedCard.tsx
+import { View, Text, Pressable } from 'react-native';
+
+interface SheedCardProps {
+  sheed: Sheed;
+  onPress: () => void;
+}
+
+export function SheedCard({ sheed, onPress }: SheedCardProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      className="bg-neutral-900/70 backdrop-blur-xl rounded-3xl p-4 border border-neutral-800"
+    >
+      {/* Content */}
+    </Pressable>
+  );
+}
+```
+
+**Rules:**
+- Named exports only (no default exports)
+- Props interface above component
+- NativeWind classes inline
+- No StyleSheet.create()
+
+---
+
+## Hook Structure
+
+```tsx
+// hooks/useSheeds.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+
+export function useSheeds() {
+  const queryClient = useQueryClient();
+
+  const sheedsQuery = useQuery({
+    queryKey: ['sheeds'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sheeds')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const createSheedMutation = useMutation({
+    mutationFn: async (newSheed: CreateSheedInput) => {
+      // ... implementation
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sheeds'] });
+    },
+  });
+
+  return {
+    sheeds: sheedsQuery.data ?? [],
+    isLoading: sheedsQuery.isLoading,
+    error: sheedsQuery.error,
+    createSheed: createSheedMutation.mutate,
+  };
+}
+```
+
+---
+
+## Zustand Store Pattern
+
+```tsx
+// stores/authStore.ts
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  setUser: (user: User | null) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      logout: () => set({ user: null, isAuthenticated: false }),
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+```
+
+---
+
+## NativeWind / Tailwind Classes
+
+### Color Palette (tailwind.config.js)
+
+```js
+colors: {
+  sheed: {
+    pink: '#FF3B7A',
+    purple: '#9A3BFF',
+    neon: '#00F5A0',
+  },
+  neutral: {
+    950: '#101012',  // bg-neutral-950 (main bg)
+    900: '#1C1C1E',  // bg-neutral-900 (surface)
+    800: '#3A3A3C',  // border-neutral-800
+    400: '#8A8A8E',  // text-neutral-400 (secondary)
+    100: '#F5F5F7',  // text-neutral-100 (primary)
+  }
+}
+```
+
+### Common Patterns
+
+```tsx
+// Glassmorphism card
+className="bg-neutral-900/70 backdrop-blur-xl border border-neutral-800 rounded-3xl"
+
+// Primary gradient button
+className="bg-gradient-to-r from-sheed-pink to-sheed-purple rounded-full px-6 py-3"
+
+// Status badges
+className="bg-yellow-400/20 text-yellow-400 px-2 py-1 rounded-full text-xs"
+className="bg-green-400/20 text-green-400 px-2 py-1 rounded-full text-xs"
+
+// Text hierarchy
+className="text-neutral-100 text-lg font-semibold"  // Primary
+className="text-neutral-400 text-sm"                 // Secondary
+```
+
+---
+
+## Testing Patterns
+
+### Component Test
+
+```tsx
+// __tests__/components/SheedCard.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react-native';
+import { SheedCard } from '@/components/SheedCard';
+
+describe('SheedCard', () => {
+  const mockSheed = {
+    id: '1',
+    status: 'active',
+    sheede_1: { display_name: 'Emma' },
+    sheede_2: { display_name: 'Lucas' },
+  };
+
+  it('displays both sheede names', () => {
+    render(<SheedCard sheed={mockSheed} onPress={jest.fn()} />);
+
+    expect(screen.getByText(/Emma/)).toBeTruthy();
+    expect(screen.getByText(/Lucas/)).toBeTruthy();
+  });
+
+  it('calls onPress when tapped', () => {
+    const onPress = jest.fn();
+    render(<SheedCard sheed={mockSheed} onPress={onPress} />);
+
+    fireEvent.press(screen.getByRole('button'));
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+### Hook Test
+
+```tsx
+// __tests__/hooks/useSheeds.test.ts
+import { renderHook, waitFor } from '@testing-library/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useSheeds } from '@/hooks/useSheeds';
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+};
+
+describe('useSheeds', () => {
+  it('returns empty array initially', async () => {
+    const { result } = renderHook(() => useSheeds(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.sheeds).toEqual([]);
+  });
+});
+```
+
+---
+
+## Supabase Patterns
+
+### Client Setup
+
+```tsx
+// lib/supabase.ts
+import { createClient } from '@supabase/supabase-js';
+import * as SecureStore from 'expo-secure-store';
+import { Database } from '@/types/database.types';
+
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: {
+      getItem: (key) => SecureStore.getItemAsync(key),
+      setItem: (key, value) => SecureStore.setItemAsync(key, value),
+      removeItem: (key) => SecureStore.deleteItemAsync(key),
+    },
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
+```
+
+### Realtime Subscription
+
+```tsx
+// In useMessages hook
+useEffect(() => {
+  const channel = supabase
+    .channel(`chatroom:${chatroomId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `chatroom_id=eq.${chatroomId}`,
+      },
+      (payload) => {
+        // Handle new message
+        queryClient.setQueryData(['messages', chatroomId], (old) =>
+          [...(old ?? []), payload.new]
+        );
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [chatroomId]);
+```
+
+---
+
+## DO's and DON'Ts
+
+### DO
+
+- Write test BEFORE implementation (TDD)
+- Use TypeScript strict mode
+- Use NativeWind classes (no StyleSheet)
+- Use TanStack Query for server state
+- Use Zustand only for local/UI state
+- Handle loading and error states
+- Add proper TypeScript types
+- Follow the file structure exactly
+- Commit after each completed task
+
+### DON'T
+
+- Skip writing tests
+- Use `any` type
+- Use StyleSheet.create()
+- Mix server state in Zustand
+- Leave console.log in code
+- Hardcode values (use env vars)
+- Create files outside defined structure
+- Implement features not in current task
+- Change the tech stack
+
+---
+
+## Error Handling
+
+```tsx
+// Always handle Supabase errors
+const { data, error } = await supabase.from('sheeds').select('*');
+
+if (error) {
+  console.error('Supabase error:', error);
+  throw new Error(error.message);
+}
+
+// In components, use error boundaries or display error states
+if (error) {
+  return <ErrorState message={error.message} onRetry={refetch} />;
+}
+```
+
+---
+
+## Navigation (Expo Router)
+
+```
+app/
+├── _layout.tsx              # Root layout with providers
+├── (auth)/
+│   ├── _layout.tsx          # Auth stack layout
+│   ├── splash.tsx
+│   ├── onboarding.tsx
+│   ├── login.tsx
+│   └── permissions.tsx
+└── (main)/
+    ├── _layout.tsx          # Main layout (auth guard)
+    ├── (tabs)/
+    │   ├── _layout.tsx      # Tab navigator
+    │   ├── sheeds.tsx
+    │   ├── chats.tsx
+    │   └── profile.tsx
+    ├── sheed/[id].tsx       # Dynamic route
+    ├── chat/[id].tsx
+    ├── new-sheed.tsx
+    └── settings.tsx
+```
+
+---
+
+## Git Commit Messages
+
+```
+TASK-ID: Short description
+
+- Bullet point of what was done
+- Another point if needed
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+Example:
+```
+SETUP-04: Configure NativeWind + tailwind.config.js
+
+- Added nativewind and tailwindcss dependencies
+- Created tailwind.config.js with SHEED color palette
+- Configured babel.config.js for NativeWind
+- Added test for NativeWind rendering
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+---
+
+## Environment Variables
+
+```
+# .env.local (DO NOT COMMIT)
+EXPO_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=xxx
+```
+
+---
+
+## Quick Reference
+
+| Need | Solution |
+|------|----------|
+| Fetch data | TanStack Query `useQuery` |
+| Mutate data | TanStack Query `useMutation` |
+| Local UI state | Zustand store |
+| Realtime updates | Supabase Realtime |
+| Style component | NativeWind className |
+| Navigation | Expo Router Link/router.push |
+| Test component | @testing-library/react-native |
+| Test hook | renderHook from @testing-library |
+| E2E test | Maestro |
+
+---
+
+*Last updated: 2026-01-22*
+
+================================================================================
+FILE: scripts/ralph.sh
+================================================================================
+
+#!/bin/bash
+# ============================================================
+# RALPH WIGGUM LOOP - SHEED Development Orchestrator
+# ============================================================
+# Based on Geoffrey Huntley's original bash loop technique
+# https://ghuntley.com/ralph/
+#
+# This script orchestrates Claude Code to build SHEED autonomously.
+# It runs Claude in a loop, auto-commits progress, and includes
+# safeguards (circuit breaker, max iterations).
+#
+# Usage:
+#   chmod +x scripts/ralph.sh
+#   ./scripts/ralph.sh
+#
+# ============================================================
+
+set -e
+
+# Configuration
+MAX_ITERATIONS=200
+MAX_CONSECUTIVE_FAILURES=5
+SLEEP_BETWEEN_ITERATIONS=3
+LOG_FILE="ralph.log"
+PROGRESS_FILE="progress.txt"
+COMPLETION_MARKER="SHEED_MVP_COMPLETE"
+
+# State
+ITERATION=0
+FAILURES=0
+START_TIME=$(date +%s)
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# ============================================================
+# Functions
+# ============================================================
+
+print_header() {
+    echo ""
+    echo -e "${BLUE}============================================================${NC}"
+    echo -e "${BLUE}  RALPH WIGGUM LOOP - SHEED Development${NC}"
+    echo -e "${BLUE}============================================================${NC}"
+    echo ""
+    echo "  Max iterations: $MAX_ITERATIONS"
+    echo "  Circuit breaker: $MAX_CONSECUTIVE_FAILURES consecutive failures"
+    echo "  Log file: $LOG_FILE"
+    echo ""
+}
+
+print_iteration() {
+    local iter=$1
+    local max=$2
+    local elapsed=$(( $(date +%s) - START_TIME ))
+    local hours=$((elapsed / 3600))
+    local minutes=$(((elapsed % 3600) / 60))
+
+    echo ""
+    echo -e "${YELLOW}------------------------------------------------------------${NC}"
+    echo -e "${YELLOW}  Iteration $iter / $max  (Runtime: ${hours}h ${minutes}m)${NC}"
+    echo -e "${YELLOW}------------------------------------------------------------${NC}"
+}
+
+check_completion() {
+    if grep -q "$COMPLETION_MARKER" "$PROGRESS_FILE" 2>/dev/null; then
+        return 0
+    fi
+    return 1
+}
+
+check_git_changes() {
+    if [ -z "$(git status --porcelain)" ]; then
+        return 1  # No changes
+    fi
+    return 0  # Has changes
+}
+
+auto_commit() {
+    local iter=$1
+    local timestamp=$(date '+%Y-%m-%d %H:%M')
+
+    git add -A
+
+    # Get last completed task from progress.txt
+    local last_task=$(grep -E "^\[" "$PROGRESS_FILE" | tail -1 | sed 's/.*\] \([A-Z]*-[0-9]*\):.*/\1/' 2>/dev/null || echo "WIP")
+
+    git commit -m "Ralph iteration $iter - $last_task ($timestamp)" \
+        --author="Ralph Wiggum <ralph@sheed.app>" \
+        2>/dev/null || true
+
+    echo -e "${GREEN}  Committed changes for iteration $iter${NC}"
+}
+
+run_claude() {
+    # Run Claude Code with the PROMPT.md content
+    # The --print flag outputs the result without interactive mode
+    echo ""
+    echo "  Running Claude Code..."
+    echo ""
+
+    # Pipe PROMPT.md to Claude and capture output
+    cat PROMPT.md | claude --print 2>&1 | tee -a "$LOG_FILE"
+
+    return ${PIPESTATUS[0]}
+}
+
+print_summary() {
+    local status=$1
+    local elapsed=$(( $(date +%s) - START_TIME ))
+    local hours=$((elapsed / 3600))
+    local minutes=$(((elapsed % 3600) / 60))
+    local seconds=$((elapsed % 60))
+
+    echo ""
+    echo -e "${BLUE}============================================================${NC}"
+    echo -e "${BLUE}  RALPH SUMMARY${NC}"
+    echo -e "${BLUE}============================================================${NC}"
+    echo ""
+    echo "  Status: $status"
+    echo "  Total iterations: $ITERATION"
+    echo "  Total runtime: ${hours}h ${minutes}m ${seconds}s"
+    echo "  Log file: $LOG_FILE"
+    echo ""
+
+    # Count completed tasks
+    if [ -f "prd.json" ]; then
+        local completed=$(grep -c '"passes": true' prd.json 2>/dev/null || echo "0")
+        local total=$(grep -c '"passes":' prd.json 2>/dev/null || echo "49")
+        echo "  Tasks completed: $completed / $total"
+    fi
+    echo ""
+}
+
+# ============================================================
+# Pre-flight checks
+# ============================================================
+
+# Check we're in the right directory
+if [ ! -f "PROMPT.md" ]; then
+    echo -e "${RED}Error: PROMPT.md not found. Run this script from the SHEED project root.${NC}"
+    exit 1
+fi
+
+if [ ! -f "prd.json" ]; then
+    echo -e "${RED}Error: prd.json not found. Run this script from the SHEED project root.${NC}"
+    exit 1
+fi
+
+# Check Claude is installed
+if ! command -v claude &> /dev/null; then
+    echo -e "${RED}Error: Claude Code CLI not found. Install with: npm install -g @anthropic-ai/claude-code${NC}"
+    exit 1
+fi
+
+# Check git is initialized
+if [ ! -d ".git" ]; then
+    echo -e "${RED}Error: Git not initialized. Run 'git init' first.${NC}"
+    exit 1
+fi
+
+# Initialize log file
+echo "Ralph Wiggum Loop Started - $(date)" > "$LOG_FILE"
+
+# ============================================================
+# Main Loop
+# ============================================================
+
+print_header
+
+while [ $ITERATION -lt $MAX_ITERATIONS ]; do
+    ITERATION=$((ITERATION + 1))
+
+    print_iteration $ITERATION $MAX_ITERATIONS
+
+    # Check for completion marker
+    if check_completion; then
+        echo ""
+        echo -e "${GREEN}  MVP COMPLETE! Found $COMPLETION_MARKER in progress.txt${NC}"
+        print_summary "SUCCESS - MVP Complete"
+        exit 0
+    fi
+
+    # Run Claude
+    run_claude
+    CLAUDE_EXIT_CODE=$?
+
+    # Check if Claude made any changes
+    if check_git_changes; then
+        echo ""
+        echo -e "${GREEN}  Changes detected!${NC}"
+        FAILURES=0
+        auto_commit $ITERATION
+    else
+        FAILURES=$((FAILURES + 1))
+        echo ""
+        echo -e "${YELLOW}  No changes detected ($FAILURES/$MAX_CONSECUTIVE_FAILURES)${NC}"
+    fi
+
+    # Circuit breaker
+    if [ $FAILURES -ge $MAX_CONSECUTIVE_FAILURES ]; then
+        echo ""
+        echo -e "${RED}  CIRCUIT BREAKER TRIGGERED${NC}"
+        echo -e "${RED}  $MAX_CONSECUTIVE_FAILURES consecutive iterations with no changes.${NC}"
+        echo -e "${RED}  Human intervention required.${NC}"
+        print_summary "STOPPED - Circuit Breaker"
+        exit 1
+    fi
+
+    # Rate limiting
+    echo ""
+    echo "  Waiting ${SLEEP_BETWEEN_ITERATIONS}s before next iteration..."
+    sleep $SLEEP_BETWEEN_ITERATIONS
+done
+
+# Max iterations reached
+echo ""
+echo -e "${YELLOW}  Max iterations ($MAX_ITERATIONS) reached.${NC}"
+print_summary "STOPPED - Max Iterations"
+exit 0
+
+================================================================================
+HOW TO USE
+================================================================================
+
+1. Create these files in your project root:
+   - PROMPT.md
+   - prd.json
+   - progress.txt
+   - AGENTS.md
+   - scripts/ralph.sh
+
+2. Make the script executable:
+   chmod +x scripts/ralph.sh
+
+3. Run Ralph:
+   ./scripts/ralph.sh
+
+4. Monitor progress:
+   tail -f ralph.log
+
+================================================================================

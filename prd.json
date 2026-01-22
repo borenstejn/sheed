@@ -1,0 +1,464 @@
+{
+  "project": "SHEED",
+  "version": "1.0.0",
+  "description": "Matchmaking app for Gen-Z - Task queue for Ralph Wiggum loop",
+  "tasks": [
+    {
+      "id": "SETUP-01",
+      "title": "Initialize Expo project with TypeScript",
+      "description": "Create new Expo project with TypeScript template using `npx create-expo-app@latest sheed-app --template blank-typescript`. Configure app.json with app name, slug, and basic settings.",
+      "phase": "Setup",
+      "dependencies": [],
+      "passes": false,
+      "testFile": "__tests__/setup/expo-init.test.ts"
+    },
+    {
+      "id": "SETUP-02",
+      "title": "Configure Jest + React Native Testing Library",
+      "description": "Install jest, @testing-library/react-native, jest-expo. Configure jest.config.js with preset 'jest-expo'. Create first sanity test.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/jest-config.test.ts"
+    },
+    {
+      "id": "SETUP-03",
+      "title": "Configure Expo Router with folder structure",
+      "description": "Install expo-router. Create app/ directory with _layout.tsx, (auth)/ group, and (main)/(tabs)/ nested group. Configure navigation scheme in app.json.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/router-config.test.ts"
+    },
+    {
+      "id": "SETUP-04",
+      "title": "Configure NativeWind + tailwind.config.js",
+      "description": "Install nativewind and tailwindcss. Create tailwind.config.js with SHEED color palette (sheed-pink, sheed-purple, etc.). Configure babel.config.js for NativeWind.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-03"],
+      "passes": false,
+      "testFile": "__tests__/setup/nativewind.test.ts"
+    },
+    {
+      "id": "SETUP-05",
+      "title": "Configure Supabase client",
+      "description": "Install @supabase/supabase-js. Create lib/supabase.ts with createClient using env variables. Configure expo-secure-store for auth persistence.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/supabase-client.test.ts"
+    },
+    {
+      "id": "SETUP-06",
+      "title": "Configure Zustand + TanStack Query",
+      "description": "Install zustand and @tanstack/react-query. Create stores/index.ts and hooks/useQueryClient.ts. Wrap app with QueryClientProvider.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-01"],
+      "passes": false,
+      "testFile": "__tests__/setup/state-management.test.ts"
+    },
+    {
+      "id": "SETUP-07",
+      "title": "Create project folder structure",
+      "description": "Create components/, hooks/, stores/, lib/, __tests__/, e2e/ directories. Add index.ts barrel exports where appropriate.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-03"],
+      "passes": false,
+      "testFile": "__tests__/setup/folder-structure.test.ts"
+    },
+    {
+      "id": "SETUP-08",
+      "title": "Configure Maestro for E2E tests",
+      "description": "Install maestro CLI. Create e2e/ directory with .maestro/ config. Create first sanity flow that opens the app.",
+      "phase": "Setup",
+      "dependencies": ["SETUP-07"],
+      "passes": false,
+      "testFile": "e2e/.maestro/sanity.yaml"
+    },
+    {
+      "id": "DB-01",
+      "title": "Create SQL migrations - ENUM types",
+      "description": "Create supabase/migrations/001_enums.sql with sheed_status, chatroom_type, message_type, notification_type ENUMs as specified in PRD.",
+      "phase": "Database",
+      "dependencies": ["SETUP-05"],
+      "passes": false,
+      "testFile": "__tests__/db/enums.test.ts"
+    },
+    {
+      "id": "DB-02",
+      "title": "Create users table migration",
+      "description": "Create supabase/migrations/002_users.sql with users table including auth_id, profile fields, gamification counters, and indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-01"],
+      "passes": false,
+      "testFile": "__tests__/db/users-table.test.ts"
+    },
+    {
+      "id": "DB-03",
+      "title": "Create contacts table migration",
+      "description": "Create supabase/migrations/003_contacts.sql with contacts table, owner_id FK, contact_user_id FK, unique constraints and indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/db/contacts-table.test.ts"
+    },
+    {
+      "id": "DB-04",
+      "title": "Create sheeds table migration",
+      "description": "Create supabase/migrations/004_sheeds.sql with sheeds table, 3 participant FKs, intro_message, status, expires_at, constraints and indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/db/sheeds-table.test.ts"
+    },
+    {
+      "id": "DB-05",
+      "title": "Create chatrooms table migration",
+      "description": "Create supabase/migrations/005_chatrooms.sql with chatrooms table, sheed_id FK, type ENUM, participant FKs, indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-04"],
+      "passes": false,
+      "testFile": "__tests__/db/chatrooms-table.test.ts"
+    },
+    {
+      "id": "DB-06",
+      "title": "Create messages table migration",
+      "description": "Create supabase/migrations/006_messages.sql with messages table, chatroom_id FK, sender_id FK, content, type, timestamps, indexes.",
+      "phase": "Database",
+      "dependencies": ["DB-05"],
+      "passes": false,
+      "testFile": "__tests__/db/messages-table.test.ts"
+    },
+    {
+      "id": "DB-07",
+      "title": "Create notifications table migration",
+      "description": "Create supabase/migrations/007_notifications.sql with notifications table, user_id FK, type ENUM, title, body, data JSON, read_at.",
+      "phase": "Database",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/db/notifications-table.test.ts"
+    },
+    {
+      "id": "DB-08",
+      "title": "Implement RLS policies for all tables",
+      "description": "Create supabase/migrations/008_rls.sql with Row Level Security policies. Critical: Sheeder cannot read sheede_sheede chatroom messages!",
+      "phase": "Database",
+      "dependencies": ["DB-07"],
+      "passes": false,
+      "testFile": "__tests__/db/rls-policies.test.ts"
+    },
+    {
+      "id": "AUTH-01",
+      "title": "Configure Supabase Auth providers",
+      "description": "Configure Supabase Auth for Google and Apple OAuth. Create hooks/useAuth.ts with signIn, signOut, getCurrentUser functions.",
+      "phase": "Authentication",
+      "dependencies": ["DB-02"],
+      "passes": false,
+      "testFile": "__tests__/auth/auth-config.test.ts"
+    },
+    {
+      "id": "AUTH-02",
+      "title": "Create animated Splash screen",
+      "description": "Create app/(auth)/splash.tsx with Lottie animation: bow+arrow shooting heart. Duration ~0.8s, auto-navigate to next screen.",
+      "phase": "Authentication",
+      "dependencies": ["SETUP-03", "SETUP-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/splash.test.tsx"
+    },
+    {
+      "id": "AUTH-03",
+      "title": "Create Onboarding screen (3 slides)",
+      "description": "Create app/(auth)/onboarding.tsx with 3 swipeable slides: value prop, social login buttons, permissions request. Use NativeWind styling.",
+      "phase": "Authentication",
+      "dependencies": ["AUTH-02"],
+      "passes": false,
+      "testFile": "__tests__/screens/onboarding.test.tsx"
+    },
+    {
+      "id": "AUTH-04",
+      "title": "Create Login SSO screen",
+      "description": "Create app/(auth)/login.tsx with Apple and Google SSO buttons. Integrate with useAuth hook. Handle auth state and navigation.",
+      "phase": "Authentication",
+      "dependencies": ["AUTH-01", "AUTH-03"],
+      "passes": false,
+      "testFile": "__tests__/screens/login.test.tsx"
+    },
+    {
+      "id": "AUTH-05",
+      "title": "Create Permissions screen",
+      "description": "Create app/(auth)/permissions.tsx requesting contacts and notifications permissions. Use expo-contacts and expo-notifications.",
+      "phase": "Authentication",
+      "dependencies": ["AUTH-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/permissions.test.tsx"
+    },
+    {
+      "id": "CONTACTS-01",
+      "title": "Create useContacts hook for phone access",
+      "description": "Create hooks/useContacts.ts using expo-contacts. Fetch, format, and return contacts with phone/email. Handle permission states.",
+      "phase": "Contacts",
+      "dependencies": ["AUTH-05"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useContacts.test.ts"
+    },
+    {
+      "id": "CONTACTS-02",
+      "title": "Import contacts to Supabase",
+      "description": "Create lib/contactsSync.ts to batch-insert contacts to Supabase. Handle duplicates, normalize phone numbers, sync status.",
+      "phase": "Contacts",
+      "dependencies": ["CONTACTS-01", "DB-03"],
+      "passes": false,
+      "testFile": "__tests__/lib/contactsSync.test.ts"
+    },
+    {
+      "id": "CONTACTS-03",
+      "title": "Match contacts with existing users",
+      "description": "Create lib/contactsMatch.ts to match imported contacts with existing SHEED users by phone/email. Update contact_user_id.",
+      "phase": "Contacts",
+      "dependencies": ["CONTACTS-02"],
+      "passes": false,
+      "testFile": "__tests__/lib/contactsMatch.test.ts"
+    },
+    {
+      "id": "CONTACTS-04",
+      "title": "Create ContactList component with search",
+      "description": "Create components/ContactList.tsx with FlatList, search input, ContactItem subcomponent. Support selection mode with checkmarks.",
+      "phase": "Contacts",
+      "dependencies": ["CONTACTS-02"],
+      "passes": false,
+      "testFile": "__tests__/components/ContactList.test.tsx"
+    },
+    {
+      "id": "SHEED-01",
+      "title": "Create Sheeds list screen with toggle",
+      "description": "Create app/(main)/(tabs)/sheeds.tsx with 'Mes Sheeds' / 'Sheede(e)' toggle. Use animated sliding pill. Empty states.",
+      "phase": "Sheeds",
+      "dependencies": ["SETUP-06", "SETUP-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/sheeds-list.test.tsx"
+    },
+    {
+      "id": "SHEED-02",
+      "title": "Create SheedCard component",
+      "description": "Create components/SheedCard.tsx with glassmorphism style, avatar pair, status badge (pending/active/success), message progress bar.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-01"],
+      "passes": false,
+      "testFile": "__tests__/components/SheedCard.test.tsx"
+    },
+    {
+      "id": "SHEED-03",
+      "title": "Create Sheed creation modal",
+      "description": "Create app/(main)/new-sheed.tsx modal. Two contact selector slots, intro message input, 'Sheed les!' CTA with confetti animation.",
+      "phase": "Sheeds",
+      "dependencies": ["CONTACTS-04"],
+      "passes": false,
+      "testFile": "__tests__/screens/new-sheed.test.tsx"
+    },
+    {
+      "id": "SHEED-04",
+      "title": "Create Edge Function create-sheed",
+      "description": "Create supabase/functions/create-sheed/index.ts. Validate inputs, insert sheed, create 3 chatrooms, send notifications to sheedés.",
+      "phase": "Sheeds",
+      "dependencies": ["DB-05"],
+      "passes": false,
+      "testFile": "__tests__/functions/create-sheed.test.ts"
+    },
+    {
+      "id": "SHEED-05",
+      "title": "Integrate Sheed creation frontend + backend",
+      "description": "Create hooks/useSheeds.ts with createSheed mutation calling Edge Function. Optimistic update, error handling, cache invalidation.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-03", "SHEED-04"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useSheeds.test.ts"
+    },
+    {
+      "id": "SHEED-06",
+      "title": "Create Sheed detail screen (Sheeder view)",
+      "description": "Create app/(main)/sheed/[id].tsx. Show triangle visualization (Sheeder-Sheede1-Sheede2), status card, locked chat preview, individual chat links.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-02"],
+      "passes": false,
+      "testFile": "__tests__/screens/sheed-detail.test.tsx"
+    },
+    {
+      "id": "SHEED-07",
+      "title": "Implement accept/decline logic (Sheede view)",
+      "description": "Add accept/decline buttons to Sheed detail for sheedés. Update sheede_1_accepted/sheede_2_accepted. Handle both-accepted state.",
+      "phase": "Sheeds",
+      "dependencies": ["SHEED-06"],
+      "passes": false,
+      "testFile": "__tests__/screens/sheed-accept-decline.test.tsx"
+    },
+    {
+      "id": "CHAT-01",
+      "title": "Create Chats list screen",
+      "description": "Create app/(main)/(tabs)/chats.tsx with list of all conversations. Group by sheed context. Show unread badges.",
+      "phase": "Chat",
+      "dependencies": ["SETUP-06"],
+      "passes": false,
+      "testFile": "__tests__/screens/chats-list.test.tsx"
+    },
+    {
+      "id": "CHAT-02",
+      "title": "Create ChatListItem component",
+      "description": "Create components/ChatListItem.tsx with avatar(s), name, last message preview, timestamp, unread count badge, sheeder/sheede indicator.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-01"],
+      "passes": false,
+      "testFile": "__tests__/components/ChatListItem.test.tsx"
+    },
+    {
+      "id": "CHAT-03",
+      "title": "Create Conversation screen",
+      "description": "Create app/(main)/chat/[id].tsx with header (avatar, name, status), message list, input bar. Support for intro message display.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-02"],
+      "passes": false,
+      "testFile": "__tests__/screens/conversation.test.tsx"
+    },
+    {
+      "id": "CHAT-04",
+      "title": "Create ChatBubble component",
+      "description": "Create components/ChatBubble.tsx with gradient for self, neutral for other. Tail-less design, grouped consecutive messages. Timestamp on tap.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-03"],
+      "passes": false,
+      "testFile": "__tests__/components/ChatBubble.test.tsx"
+    },
+    {
+      "id": "CHAT-05",
+      "title": "Create useMessages hook with Supabase Realtime",
+      "description": "Create hooks/useMessages.ts with Supabase Realtime subscription. Auto-scroll on new messages, typing indicators, read receipts.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-03", "DB-06"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useMessages.test.ts"
+    },
+    {
+      "id": "CHAT-06",
+      "title": "Implement message sending with optimistic updates",
+      "description": "Add sendMessage to useMessages. Optimistic insert, Supabase insert, rollback on error. Update message_count in sheeds table.",
+      "phase": "Chat",
+      "dependencies": ["CHAT-05"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useMessages-send.test.ts"
+    },
+    {
+      "id": "PROFILE-01",
+      "title": "Create Profile screen with stats",
+      "description": "Create app/(main)/(tabs)/profile.tsx with avatar, username, stats cards (sheeds created, successful, rate), settings list.",
+      "phase": "Profile",
+      "dependencies": ["SETUP-06"],
+      "passes": false,
+      "testFile": "__tests__/screens/profile.test.tsx"
+    },
+    {
+      "id": "PROFILE-02",
+      "title": "Create StatCard component",
+      "description": "Create components/StatCard.tsx with glassmorphism, large number with animated count-up, label. Support for percentage display.",
+      "phase": "Profile",
+      "dependencies": ["PROFILE-01"],
+      "passes": false,
+      "testFile": "__tests__/components/StatCard.test.tsx"
+    },
+    {
+      "id": "PROFILE-03",
+      "title": "Create useUserStats hook",
+      "description": "Create hooks/useUserStats.ts fetching user stats from Supabase. Calculate success rate, rank among friends.",
+      "phase": "Profile",
+      "dependencies": ["PROFILE-01"],
+      "passes": false,
+      "testFile": "__tests__/hooks/useUserStats.test.ts"
+    },
+    {
+      "id": "PROFILE-04",
+      "title": "Create Settings screen",
+      "description": "Create app/(main)/settings.tsx with notifications toggle, blocked accounts, help, logout. Persist settings to Supabase.",
+      "phase": "Profile",
+      "dependencies": ["PROFILE-01"],
+      "passes": false,
+      "testFile": "__tests__/screens/settings.test.tsx"
+    },
+    {
+      "id": "NOTIF-01",
+      "title": "Configure Expo Push Notifications",
+      "description": "Configure expo-notifications. Request permissions, get push token, store in users.push_token. Handle notification tap navigation.",
+      "phase": "Notifications",
+      "dependencies": ["AUTH-05"],
+      "passes": false,
+      "testFile": "__tests__/notifications/push-config.test.ts"
+    },
+    {
+      "id": "NOTIF-02",
+      "title": "Create Edge Function send-notification",
+      "description": "Create supabase/functions/send-notification/index.ts. Accept user_id, type, title, body. Send via Expo Push API, insert to notifications table.",
+      "phase": "Notifications",
+      "dependencies": ["DB-07"],
+      "passes": false,
+      "testFile": "__tests__/functions/send-notification.test.ts"
+    },
+    {
+      "id": "NOTIF-03",
+      "title": "Create DB triggers for auto-notifications",
+      "description": "Create supabase/migrations/009_triggers.sql with triggers: new_sheed -> notify sheedés, message_count >= 10 -> notify success, expires_at approaching -> notify warning.",
+      "phase": "Notifications",
+      "dependencies": ["NOTIF-02"],
+      "passes": false,
+      "testFile": "__tests__/db/triggers.test.ts"
+    },
+    {
+      "id": "POLISH-01",
+      "title": "Add micro-interaction animations",
+      "description": "Add Lottie/Reanimated animations: confetti on sheed creation, heart bounce on success, badge pulse on new message, button press feedback.",
+      "phase": "Polish",
+      "dependencies": ["SHEED-05", "CHAT-06"],
+      "passes": false,
+      "testFile": "__tests__/animations/micro-interactions.test.ts"
+    },
+    {
+      "id": "POLISH-02",
+      "title": "Write unit tests for all hooks",
+      "description": "Ensure 80%+ coverage on all hooks: useAuth, useContacts, useSheeds, useMessages, useUserStats. Mock Supabase client.",
+      "phase": "Polish",
+      "dependencies": ["CHAT-06", "PROFILE-03"],
+      "passes": false,
+      "testFile": "__tests__/coverage-report.test.ts"
+    },
+    {
+      "id": "POLISH-03",
+      "title": "Create E2E tests with Maestro",
+      "description": "Create Maestro flows: onboarding.yaml, create-sheed.yaml, chat-flow.yaml, profile.yaml. Cover critical user journeys.",
+      "phase": "Polish",
+      "dependencies": ["SETUP-08", "CHAT-06", "PROFILE-01"],
+      "passes": false,
+      "testFile": "e2e/.maestro/full-flow.yaml"
+    },
+    {
+      "id": "POLISH-04",
+      "title": "Build with EAS and test on device",
+      "description": "Configure eas.json for development and preview builds. Run EAS build. Test on physical iOS and Android devices. Fix any platform-specific issues.",
+      "phase": "Polish",
+      "dependencies": ["POLISH-03"],
+      "passes": false,
+      "testFile": "__tests__/build/eas-build.test.ts"
+    }
+  ],
+  "metadata": {
+    "totalTasks": 49,
+    "phases": [
+      {"name": "Setup", "count": 8},
+      {"name": "Database", "count": 8},
+      {"name": "Authentication", "count": 5},
+      {"name": "Contacts", "count": 4},
+      {"name": "Sheeds", "count": 7},
+      {"name": "Chat", "count": 6},
+      {"name": "Profile", "count": 4},
+      {"name": "Notifications", "count": 3},
+      {"name": "Polish", "count": 4}
+    ],
+    "createdAt": "2026-01-22",
+    "completionMarker": "SHEED_MVP_COMPLETE"
+  }
+}

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHEED PRD Viewer</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Marked.js for Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light" disabled>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              500: '#8B5CF6',
+              600: '#7C3AED',
+              700: '#6D28D9',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #6B7280; }
+
+    /* Markdown content styling */
+    .prose h1 { font-size: 2rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #E5E7EB; }
+    .dark .prose h1 { border-bottom-color: #374151; }
+    .prose h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #8B5CF6; }
+    .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    .prose h4 { font-size: 1.1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .prose p { margin-bottom: 1rem; line-height: 1.7; }
+    .prose ul, .prose ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    .prose li { margin-bottom: 0.25rem; }
+    .prose code { background: #F3F4F6; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; }
+    .dark .prose code { background: #374151; }
+    .prose pre { margin-bottom: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+    .prose pre code { background: transparent; padding: 0; }
+    .prose table { width: 100%; margin-bottom: 1rem; border-collapse: collapse; }
+    .prose th, .prose td { border: 1px solid #E5E7EB; padding: 0.5rem 0.75rem; text-align: left; }
+    .dark .prose th, .dark .prose td { border-color: #374151; }
+    .prose th { background: #F9FAFB; font-weight: 600; }
+    .dark .prose th { background: #1F2937; }
+    .prose blockquote { border-left: 4px solid #8B5CF6; padding-left: 1rem; margin: 1rem 0; color: #6B7280; }
+    .prose hr { margin: 2rem 0; border-color: #E5E7EB; }
+    .dark .prose hr { border-color: #374151; }
+    .prose a { color: #8B5CF6; text-decoration: underline; }
+
+    /* Annotation highlights */
+    .annotation-highlight { cursor: pointer; position: relative; }
+    .annotation-highlight.comment { background: rgba(59, 130, 246, 0.2); border-bottom: 2px solid #3B82F6; }
+    .annotation-highlight.correction { background: rgba(239, 68, 68, 0.2); border-bottom: 2px solid #EF4444; }
+    .annotation-highlight.suggestion { background: rgba(34, 197, 94, 0.2); border-bottom: 2px solid #22C55E; }
+    .annotation-highlight.question { background: rgba(234, 179, 8, 0.2); border-bottom: 2px solid #EAB308; }
+
+    /* Sidebar navigation */
+    .nav-item { transition: all 0.15s ease; }
+    .nav-item:hover { background: rgba(139, 92, 246, 0.1); }
+    .nav-item.active { background: rgba(139, 92, 246, 0.2); border-left: 3px solid #8B5CF6; }
+
+    /* Print styles */
+    @media print {
+      .no-print { display: none !important; }
+      .prose { max-width: 100% !important; }
+      body { background: white !important; }
+    }
+  </style>
+</head>
+<body class="dark bg-gray-900 text-gray-100 transition-colors duration-200">
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-800 dark:bg-gray-800 border-b border-gray-700 z-50 flex items-center px-4 no-print">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">&#128156;</span>
+      <h1 class="text-xl font-bold text-white">SHEED PRD Viewer</h1>
+    </div>
+
+    <div class="flex-1 max-w-md mx-8">
+      <div class="relative">
+        <input type="text" id="search-input" placeholder="Search PRD..."
+          class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+        <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <!-- Theme Toggle -->
+      <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-700 transition-colors" title="Toggle theme">
+        <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+        <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+      </button>
+
+      <!-- Export Annotations -->
+      <button id="export-btn" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-medium transition-colors" title="Export annotations">
+        Export
+      </button>
+
+      <!-- Import Annotations -->
+      <label class="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium cursor-pointer transition-colors" title="Import annotations">
+        Import
+        <input type="file" id="import-input" accept=".json" class="hidden">
+      </label>
+
+      <!-- Print -->
+      <button onclick="window.print()" class="p-2 rounded-lg hover:bg-gray-700 transition-colors" title="Print">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="flex pt-14 h-screen">
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="w-72 bg-gray-800 dark:bg-gray-800 border-r border-gray-700 overflow-y-auto flex-shrink-0 no-print">
+      <nav id="nav-tree" class="p-4">
+        <!-- Navigation will be generated here -->
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="content-area" class="flex-1 overflow-y-auto bg-gray-900 dark:bg-gray-900">
+      <div class="max-w-4xl mx-auto p-8">
+        <article id="content" class="prose dark:prose-invert max-w-none">
+          <!-- Markdown content will be rendered here -->
+        </article>
+      </div>
+    </main>
+
+    <!-- Annotations Panel -->
+    <aside id="annotations-panel" class="w-80 bg-gray-800 dark:bg-gray-800 border-l border-gray-700 overflow-y-auto flex-shrink-0 no-print">
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">Annotations</h2>
+          <span id="annotation-count" class="px-2 py-1 bg-gray-700 rounded-full text-xs">0</span>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button class="annotation-filter active px-3 py-1 rounded-full text-xs font-medium bg-gray-700" data-filter="all">All</button>
+          <button class="annotation-filter px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/50" data-filter="comment">Comments</button>
+          <button class="annotation-filter px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/50" data-filter="correction">Corrections</button>
+          <button class="annotation-filter px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/50" data-filter="suggestion">Suggestions</button>
+          <button class="annotation-filter px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/50" data-filter="question">Questions</button>
+        </div>
+
+        <!-- Annotations list -->
+        <div id="annotations-list" class="space-y-3">
+          <!-- Annotations will be rendered here -->
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Annotation Modal -->
+  <div id="annotation-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
+      <h3 class="text-lg font-semibold mb-4">Add Annotation</h3>
+
+      <div class="mb-4">
+        <label class="block text-sm text-gray-400 mb-2">Selected Text</label>
+        <p id="selected-text-preview" class="bg-gray-700 rounded-lg p-3 text-sm max-h-24 overflow-y-auto"></p>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm text-gray-400 mb-2">Type</label>
+        <div class="flex gap-2">
+          <button class="annotation-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-blue-500 text-blue-400" data-type="comment">Comment</button>
+          <button class="annotation-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-transparent text-gray-400" data-type="correction">Correction</button>
+          <button class="annotation-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-transparent text-gray-400" data-type="suggestion">Suggestion</button>
+          <button class="annotation-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-transparent text-gray-400" data-type="question">Question</button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm text-gray-400 mb-2">Note</label>
+        <textarea id="annotation-note" rows="4" placeholder="Add your note here..."
+          class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="cancel-annotation" class="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors">Cancel</button>
+        <button id="save-annotation" class="flex-1 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Annotation Modal -->
+  <div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
+      <h3 class="text-lg font-semibold mb-4">Edit Annotation</h3>
+
+      <div class="mb-4">
+        <label class="block text-sm text-gray-400 mb-2">Selected Text</label>
+        <p id="edit-text-preview" class="bg-gray-700 rounded-lg p-3 text-sm max-h-24 overflow-y-auto"></p>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm text-gray-400 mb-2">Type</label>
+        <div class="flex gap-2">
+          <button class="edit-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-transparent text-gray-400" data-type="comment">Comment</button>
+          <button class="edit-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-transparent text-gray-400" data-type="correction">Correction</button>
+          <button class="edit-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-transparent text-gray-400" data-type="suggestion">Suggestion</button>
+          <button class="edit-type-btn flex-1 py-2 rounded-lg text-sm font-medium border-2 border-transparent text-gray-400" data-type="question">Question</button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm text-gray-400 mb-2">Note</label>
+        <textarea id="edit-note" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="delete-annotation" class="py-2 px-4 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors">Delete</button>
+        <button id="cancel-edit" class="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors">Cancel</button>
+        <button id="save-edit" class="flex-1 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-gray-700 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <span id="toast-message"></span>
+  </div>
+
+<script>
+// ============================================================
+// PRD CONTENT (Embedded)
+// ============================================================
+const PRD_CONTENT = `
+{{PRD_CONTENT_PLACEHOLDER}}
+`;
+
+// ============================================================
+// APPLICATION STATE
+// ============================================================
+const state = {
+  annotations: [],
+  currentFilter: 'all',
+  selectedText: '',
+  selectedRange: null,
+  currentAnnotationType: 'comment',
+  editingAnnotationId: null,
+  sections: [],
+  isDarkMode: true
+};
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load PRD content
+  await loadPRDContent();
+
+  // Load annotations from localStorage
+  loadAnnotations();
+
+  // Setup event listeners
+  setupEventListeners();
+
+  // Apply highlights
+  applyAnnotationHighlights();
+
+  // Render annotations panel
+  renderAnnotationsPanel();
+
+  // Load theme preference
+  loadThemePreference();
+});
+
+// ============================================================
+// PRD LOADING & RENDERING
+// ============================================================
+async function loadPRDContent() {
+  let content = PRD_CONTENT;
+
+  // Try to fetch from file if placeholder wasn't replaced
+  if (content.includes('{{PRD_CONTENT_PLACEHOLDER}}')) {
+    try {
+      const response = await fetch('SHEED-PRD.md');
+      if (response.ok) {
+        content = await response.text();
+      } else {
+        throw new Error('File not found');
+      }
+    } catch (e) {
+      content = `# PRD Loading Instructions
+
+## Option 1: Local Server (Recommended)
+
+Run a local server in the \`/docs\` directory:
+
+\`\`\`bash
+# Using Python
+python -m http.server 8000
+
+# Using Node.js
+npx serve .
+
+# Using PHP
+php -S localhost:8000
+\`\`\`
+
+Then open http://localhost:8000/prd-viewer.html
+
+## Option 2: Direct File Access
+
+Some browsers block local file access. If you see this message:
+1. Use a local server as described above
+2. Or open the SHEED-PRD.md file directly in your editor
+
+## Files Required
+- \`/docs/prd-viewer.html\` (this file)
+- \`/docs/SHEED-PRD.md\` (the PRD document)
+
+Both files should be in the same directory.
+`;
+    }
+  }
+
+  // Configure marked
+  marked.setOptions({
+    highlight: function(code, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(code, { language: lang }).value;
+      }
+      return hljs.highlightAuto(code).value;
+    },
+    breaks: true,
+    gfm: true
+  });
+
+  // Render markdown
+  const html = marked.parse(content);
+  document.getElementById('content').innerHTML = html;
+
+  // Generate navigation
+  generateNavigation();
+
+  // Add IDs to headers for navigation
+  addHeaderIds();
+}
+
+function generateNavigation() {
+  const content = document.getElementById('content');
+  const headers = content.querySelectorAll('h1, h2, h3');
+  const navTree = document.getElementById('nav-tree');
+
+  let html = '';
+  let currentH1 = null;
+  let currentH2 = null;
+
+  headers.forEach((header, index) => {
+    const text = header.textContent;
+    const id = `section-${index}`;
+    header.id = id;
+
+    state.sections.push({ id, text, level: header.tagName });
+
+    if (header.tagName === 'H1') {
+      if (currentH2) html += '</div>';
+      if (currentH1) html += '</div>';
+      html += `<div class="mb-2">
+        <a href="#${id}" class="nav-item block py-2 px-3 rounded-lg text-sm font-semibold text-white hover:text-primary-400">${text}</a>
+        <div class="ml-3">`;
+      currentH1 = header;
+      currentH2 = null;
+    } else if (header.tagName === 'H2') {
+      if (currentH2) html += '</div>';
+      html += `<div class="mb-1">
+        <a href="#${id}" class="nav-item block py-1.5 px-3 rounded-lg text-sm text-gray-300 hover:text-white">${text}</a>
+        <div class="ml-3">`;
+      currentH2 = header;
+    } else if (header.tagName === 'H3') {
+      html += `<a href="#${id}" class="nav-item block py-1 px-3 rounded text-xs text-gray-400 hover:text-gray-200">${text}</a>`;
+    }
+  });
+
+  if (currentH2) html += '</div></div>';
+  if (currentH1) html += '</div></div>';
+
+  navTree.innerHTML = html;
+
+  // Setup navigation click handlers
+  navTree.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      // Update active state
+      navTree.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      e.target.classList.add('active');
+    });
+  });
+}
+
+function addHeaderIds() {
+  const content = document.getElementById('content');
+  const headers = content.querySelectorAll('h1, h2, h3, h4');
+
+  headers.forEach((header, index) => {
+    if (!header.id) {
+      header.id = `section-${index}`;
+    }
+  });
+}
+
+// ============================================================
+// ANNOTATIONS
+// ============================================================
+function loadAnnotations() {
+  const saved = localStorage.getItem('sheed-prd-annotations');
+  if (saved) {
+    state.annotations = JSON.parse(saved);
+  }
+}
+
+function saveAnnotations() {
+  localStorage.setItem('sheed-prd-annotations', JSON.stringify(state.annotations));
+}
+
+function createAnnotation(text, type, note, range) {
+  const annotation = {
+    id: Date.now().toString(),
+    text: text,
+    type: type,
+    note: note,
+    timestamp: new Date().toISOString(),
+    // Store position info for re-highlighting
+    startOffset: range ? range.startOffset : 0,
+    endOffset: range ? range.endOffset : 0,
+    parentText: range ? range.commonAncestorContainer.textContent?.substring(0, 100) : ''
+  };
+
+  state.annotations.push(annotation);
+  saveAnnotations();
+  applyAnnotationHighlights();
+  renderAnnotationsPanel();
+  showToast('Annotation added');
+}
+
+function updateAnnotation(id, type, note) {
+  const annotation = state.annotations.find(a => a.id === id);
+  if (annotation) {
+    annotation.type = type;
+    annotation.note = note;
+    annotation.timestamp = new Date().toISOString();
+    saveAnnotations();
+    applyAnnotationHighlights();
+    renderAnnotationsPanel();
+    showToast('Annotation updated');
+  }
+}
+
+function deleteAnnotation(id) {
+  state.annotations = state.annotations.filter(a => a.id !== id);
+  saveAnnotations();
+  applyAnnotationHighlights();
+  renderAnnotationsPanel();
+  showToast('Annotation deleted');
+}
+
+function applyAnnotationHighlights() {
+  // Remove existing highlights
+  document.querySelectorAll('.annotation-highlight').forEach(el => {
+    const parent = el.parentNode;
+    parent.replaceChild(document.createTextNode(el.textContent), el);
+    parent.normalize();
+  });
+
+  // Apply highlights for each annotation
+  const content = document.getElementById('content');
+
+  state.annotations.forEach(annotation => {
+    const walker = document.createTreeWalker(
+      content,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false
+    );
+
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const index = node.textContent.indexOf(annotation.text);
+
+      if (index !== -1 && annotation.text.length > 0) {
+        const range = document.createRange();
+        range.setStart(node, index);
+        range.setEnd(node, index + annotation.text.length);
+
+        const span = document.createElement('span');
+        span.className = `annotation-highlight ${annotation.type}`;
+        span.dataset.annotationId = annotation.id;
+        span.title = `${annotation.type}: ${annotation.note.substring(0, 50)}...`;
+
+        try {
+          range.surroundContents(span);
+
+          // Click handler to scroll to annotation
+          span.addEventListener('click', () => {
+            scrollToAnnotation(annotation.id);
+          });
+        } catch (e) {
+          // Range crosses element boundaries, skip
+        }
+
+        break; // Only highlight first occurrence
+      }
+    }
+  });
+}
+
+function renderAnnotationsPanel() {
+  const list = document.getElementById('annotations-list');
+  const countEl = document.getElementById('annotation-count');
+
+  let filtered = state.annotations;
+  if (state.currentFilter !== 'all') {
+    filtered = state.annotations.filter(a => a.type === state.currentFilter);
+  }
+
+  countEl.textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="text-center py-8 text-gray-500">
+        <p class="text-sm">No annotations yet</p>
+        <p class="text-xs mt-1">Select text to add annotations</p>
+      </div>
+    `;
+    return;
+  }
+
+  const typeColors = {
+    comment: 'border-blue-500 bg-blue-500/10',
+    correction: 'border-red-500 bg-red-500/10',
+    suggestion: 'border-green-500 bg-green-500/10',
+    question: 'border-yellow-500 bg-yellow-500/10'
+  };
+
+  const typeLabels = {
+    comment: 'Comment',
+    correction: 'Correction',
+    suggestion: 'Suggestion',
+    question: 'Question'
+  };
+
+  list.innerHTML = filtered.map(annotation => `
+    <div class="annotation-card p-3 rounded-lg border-l-4 ${typeColors[annotation.type]} cursor-pointer hover:bg-gray-700/50 transition-colors"
+         data-id="${annotation.id}">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-medium text-gray-400">${typeLabels[annotation.type]}</span>
+        <span class="text-xs text-gray-500">${formatDate(annotation.timestamp)}</span>
+      </div>
+      <p class="text-sm text-gray-300 mb-2 line-clamp-2">"${escapeHtml(annotation.text.substring(0, 100))}${annotation.text.length > 100 ? '...' : ''}"</p>
+      <p class="text-sm text-white">${escapeHtml(annotation.note)}</p>
+    </div>
+  `).join('');
+
+  // Add click handlers
+  list.querySelectorAll('.annotation-card').forEach(card => {
+    card.addEventListener('click', () => {
+      openEditModal(card.dataset.id);
+    });
+  });
+}
+
+function scrollToAnnotation(id) {
+  const el = document.querySelector(`[data-annotation-id="${id}"]`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('ring-2', 'ring-primary-500');
+    setTimeout(() => {
+      el.classList.remove('ring-2', 'ring-primary-500');
+    }, 2000);
+  }
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openAnnotationModal() {
+  const modal = document.getElementById('annotation-modal');
+  const preview = document.getElementById('selected-text-preview');
+
+  preview.textContent = state.selectedText;
+  document.getElementById('annotation-note').value = '';
+
+  // Reset type selection
+  document.querySelectorAll('.annotation-type-btn').forEach(btn => {
+    btn.classList.remove('border-blue-500', 'border-red-500', 'border-green-500', 'border-yellow-500', 'text-blue-400', 'text-red-400', 'text-green-400', 'text-yellow-400');
+    btn.classList.add('border-transparent', 'text-gray-400');
+  });
+  document.querySelector('[data-type="comment"]').classList.remove('border-transparent', 'text-gray-400');
+  document.querySelector('[data-type="comment"]').classList.add('border-blue-500', 'text-blue-400');
+  state.currentAnnotationType = 'comment';
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeAnnotationModal() {
+  const modal = document.getElementById('annotation-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  state.selectedText = '';
+  state.selectedRange = null;
+}
+
+function openEditModal(id) {
+  const annotation = state.annotations.find(a => a.id === id);
+  if (!annotation) return;
+
+  state.editingAnnotationId = id;
+
+  const modal = document.getElementById('edit-modal');
+  document.getElementById('edit-text-preview').textContent = annotation.text;
+  document.getElementById('edit-note').value = annotation.note;
+
+  // Set type selection
+  const typeColors = {
+    comment: ['border-blue-500', 'text-blue-400'],
+    correction: ['border-red-500', 'text-red-400'],
+    suggestion: ['border-green-500', 'text-green-400'],
+    question: ['border-yellow-500', 'text-yellow-400']
+  };
+
+  document.querySelectorAll('.edit-type-btn').forEach(btn => {
+    btn.classList.remove('border-blue-500', 'border-red-500', 'border-green-500', 'border-yellow-500', 'text-blue-400', 'text-red-400', 'text-green-400', 'text-yellow-400');
+    btn.classList.add('border-transparent', 'text-gray-400');
+
+    if (btn.dataset.type === annotation.type) {
+      btn.classList.remove('border-transparent', 'text-gray-400');
+      btn.classList.add(...typeColors[annotation.type]);
+    }
+  });
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeEditModal() {
+  const modal = document.getElementById('edit-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  state.editingAnnotationId = null;
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+function setupEventListeners() {
+  // Text selection for annotations
+  document.getElementById('content').addEventListener('mouseup', handleTextSelection);
+
+  // Annotation type buttons
+  document.querySelectorAll('.annotation-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const typeColors = {
+        comment: ['border-blue-500', 'text-blue-400'],
+        correction: ['border-red-500', 'text-red-400'],
+        suggestion: ['border-green-500', 'text-green-400'],
+        question: ['border-yellow-500', 'text-yellow-400']
+      };
+
+      document.querySelectorAll('.annotation-type-btn').forEach(b => {
+        b.classList.remove('border-blue-500', 'border-red-500', 'border-green-500', 'border-yellow-500', 'text-blue-400', 'text-red-400', 'text-green-400', 'text-yellow-400');
+        b.classList.add('border-transparent', 'text-gray-400');
+      });
+
+      btn.classList.remove('border-transparent', 'text-gray-400');
+      btn.classList.add(...typeColors[btn.dataset.type]);
+      state.currentAnnotationType = btn.dataset.type;
+    });
+  });
+
+  // Edit type buttons
+  document.querySelectorAll('.edit-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const typeColors = {
+        comment: ['border-blue-500', 'text-blue-400'],
+        correction: ['border-red-500', 'text-red-400'],
+        suggestion: ['border-green-500', 'text-green-400'],
+        question: ['border-yellow-500', 'text-yellow-400']
+      };
+
+      document.querySelectorAll('.edit-type-btn').forEach(b => {
+        b.classList.remove('border-blue-500', 'border-red-500', 'border-green-500', 'border-yellow-500', 'text-blue-400', 'text-red-400', 'text-green-400', 'text-yellow-400');
+        b.classList.add('border-transparent', 'text-gray-400');
+      });
+
+      btn.classList.remove('border-transparent', 'text-gray-400');
+      btn.classList.add(...typeColors[btn.dataset.type]);
+    });
+  });
+
+  // Filter buttons
+  document.querySelectorAll('.annotation-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.annotation-filter').forEach(b => b.classList.remove('active', 'bg-gray-600'));
+      btn.classList.add('active');
+      if (btn.dataset.filter === 'all') btn.classList.add('bg-gray-600');
+      state.currentFilter = btn.dataset.filter;
+      renderAnnotationsPanel();
+    });
+  });
+
+  // Modal buttons
+  document.getElementById('cancel-annotation').addEventListener('click', closeAnnotationModal);
+  document.getElementById('save-annotation').addEventListener('click', () => {
+    const note = document.getElementById('annotation-note').value.trim();
+    if (!note) {
+      showToast('Please add a note');
+      return;
+    }
+    createAnnotation(state.selectedText, state.currentAnnotationType, note, state.selectedRange);
+    closeAnnotationModal();
+  });
+
+  document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+  document.getElementById('save-edit').addEventListener('click', () => {
+    const note = document.getElementById('edit-note').value.trim();
+    const activeBtn = document.querySelector('.edit-type-btn:not(.text-gray-400)');
+    const type = activeBtn ? activeBtn.dataset.type : 'comment';
+
+    if (!note) {
+      showToast('Please add a note');
+      return;
+    }
+
+    updateAnnotation(state.editingAnnotationId, type, note);
+    closeEditModal();
+  });
+
+  document.getElementById('delete-annotation').addEventListener('click', () => {
+    if (confirm('Delete this annotation?')) {
+      deleteAnnotation(state.editingAnnotationId);
+      closeEditModal();
+    }
+  });
+
+  // Theme toggle
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+  // Export/Import
+  document.getElementById('export-btn').addEventListener('click', exportAnnotations);
+  document.getElementById('import-input').addEventListener('change', importAnnotations);
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', handleSearch);
+
+  // Close modals on background click
+  document.getElementById('annotation-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeAnnotationModal();
+  });
+  document.getElementById('edit-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeEditModal();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAnnotationModal();
+      closeEditModal();
+    }
+  });
+}
+
+function handleTextSelection() {
+  const selection = window.getSelection();
+  const text = selection.toString().trim();
+
+  if (text.length > 3) {
+    state.selectedText = text;
+    state.selectedRange = selection.getRangeAt(0).cloneRange();
+    openAnnotationModal();
+  }
+}
+
+function handleSearch(e) {
+  const query = e.target.value.toLowerCase();
+  const content = document.getElementById('content');
+
+  // Remove previous highlights
+  content.querySelectorAll('.search-highlight').forEach(el => {
+    const text = el.textContent;
+    el.replaceWith(text);
+  });
+
+  if (query.length < 2) return;
+
+  // Find and scroll to first match
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
+  let firstMatch = null;
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    const index = node.textContent.toLowerCase().indexOf(query);
+
+    if (index !== -1) {
+      if (!firstMatch) firstMatch = node;
+
+      // Could add highlighting here if needed
+    }
+  }
+
+  if (firstMatch) {
+    firstMatch.parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function toggleTheme() {
+  state.isDarkMode = !state.isDarkMode;
+  applyTheme();
+  localStorage.setItem('sheed-prd-theme', state.isDarkMode ? 'dark' : 'light');
+}
+
+function loadThemePreference() {
+  const saved = localStorage.getItem('sheed-prd-theme');
+  if (saved) {
+    state.isDarkMode = saved === 'dark';
+  }
+  applyTheme();
+}
+
+function applyTheme() {
+  const html = document.documentElement;
+  const body = document.body;
+  const sunIcon = document.getElementById('sun-icon');
+  const moonIcon = document.getElementById('moon-icon');
+  const hljsDark = document.getElementById('hljs-dark');
+  const hljsLight = document.getElementById('hljs-light');
+
+  if (state.isDarkMode) {
+    html.classList.add('dark');
+    body.classList.add('dark', 'bg-gray-900', 'text-gray-100');
+    body.classList.remove('bg-white', 'text-gray-900');
+    sunIcon.classList.add('hidden');
+    moonIcon.classList.remove('hidden');
+    hljsDark.disabled = false;
+    hljsLight.disabled = true;
+  } else {
+    html.classList.remove('dark');
+    body.classList.remove('dark', 'bg-gray-900', 'text-gray-100');
+    body.classList.add('bg-white', 'text-gray-900');
+    sunIcon.classList.remove('hidden');
+    moonIcon.classList.add('hidden');
+    hljsDark.disabled = true;
+    hljsLight.disabled = false;
+  }
+}
+
+// ============================================================
+// EXPORT/IMPORT
+// ============================================================
+function exportAnnotations() {
+  const data = {
+    version: '1.0',
+    exportDate: new Date().toISOString(),
+    annotations: state.annotations
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sheed-prd-annotations-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Annotations exported');
+}
+
+function importAnnotations(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const data = JSON.parse(event.target.result);
+
+      if (data.annotations && Array.isArray(data.annotations)) {
+        // Merge with existing, avoiding duplicates
+        const existingIds = new Set(state.annotations.map(a => a.id));
+        const newAnnotations = data.annotations.filter(a => !existingIds.has(a.id));
+
+        state.annotations = [...state.annotations, ...newAnnotations];
+        saveAnnotations();
+        applyAnnotationHighlights();
+        renderAnnotationsPanel();
+        showToast(`Imported ${newAnnotations.length} annotations`);
+      } else {
+        showToast('Invalid file format');
+      }
+    } catch (err) {
+      showToast('Failed to parse file');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // Reset input
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  const messageEl = document.getElementById('toast-message');
+
+  messageEl.textContent = message;
+  toast.classList.remove('translate-y-20', 'opacity-0');
+
+  setTimeout(() => {
+    toast.classList.add('translate-y-20', 'opacity-0');
+  }, 3000);
+}
+
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  const now = new Date();
+  const diff = now - date;
+
+  if (diff < 60000) return 'Just now';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>

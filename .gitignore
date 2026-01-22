@@ -34,3 +34,23 @@ coverage/
 # Misc
 *.tmp
 *.temp
+
+# Ralph Wiggum Loop
+ralph.log
+
+# Expo
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Supabase
+supabase/.branches
+supabase/.temp
+
+# EAS
+.eas/
