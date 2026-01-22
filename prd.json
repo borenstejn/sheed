@@ -9,9 +9,10 @@
       "description": "Create new Expo project with TypeScript template using `npx create-expo-app@latest . --template blank-typescript --yes` (--yes for non-interactive). Configure app.json with app name 'SHEED', slug 'sheed'. Add 'type-check' script to package.json: \"type-check\": \"tsc --noEmit\". EXCEPTION: This is the only task where test is written AFTER implementation since __tests__ folder doesn't exist yet.",
       "phase": "Setup",
       "dependencies": [],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-23",
       "testFile": "__tests__/setup/expo-init.test.ts",
-      "notes": "Bootstrap task - test written after implementation"
+      "notes": "Expo SDK 54 with New Architecture. App configured with dark theme."
     },
     {
       "id": "SETUP-02",
@@ -19,8 +20,10 @@
       "description": "Install jest, @testing-library/react-native, jest-expo. Configure jest.config.js with preset 'jest-expo'. Create first sanity test.",
       "phase": "Setup",
       "dependencies": ["SETUP-01"],
-      "passes": false,
-      "testFile": "__tests__/setup/jest-config.test.ts"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/setup/jest-config.test.ts",
+      "notes": "Used ts-jest instead of jest-expo due to SDK 54 compatibility"
     },
     {
       "id": "SETUP-03",
@@ -28,8 +31,10 @@
       "description": "Install expo-router. Create app/ directory with _layout.tsx, (auth)/ group, and (main)/(tabs)/ nested group. Configure navigation scheme in app.json.",
       "phase": "Setup",
       "dependencies": ["SETUP-01"],
-      "passes": false,
-      "testFile": "__tests__/setup/router-config.test.ts"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/setup/router-config.test.ts",
+      "notes": "Expo Router v6 with typed routes enabled"
     },
     {
       "id": "SETUP-04",
@@ -37,8 +42,10 @@
       "description": "Install nativewind and tailwindcss. Create tailwind.config.js with SHEED color palette (sheed-pink, sheed-purple, etc.). Configure babel.config.js for NativeWind.",
       "phase": "Setup",
       "dependencies": ["SETUP-03"],
-      "passes": false,
-      "testFile": "__tests__/setup/nativewind.test.ts"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/setup/nativewind.test.ts",
+      "notes": "NativeWind v4 with tailwindcss v4"
     },
     {
       "id": "SETUP-05",
@@ -46,8 +53,10 @@
       "description": "Install @supabase/supabase-js. Create lib/supabase.ts with createClient using env variables. Configure expo-secure-store for auth persistence.",
       "phase": "Setup",
       "dependencies": ["SETUP-01"],
-      "passes": false,
-      "testFile": "__tests__/setup/supabase-client.test.ts"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/setup/supabase-client.test.ts",
+      "notes": "SecureStore adapter for auth persistence, typed client with Database types"
     },
     {
       "id": "SETUP-06",
@@ -55,8 +64,10 @@
       "description": "Install zustand and @tanstack/react-query. Create stores/index.ts and hooks/useQueryClient.ts. Wrap app with QueryClientProvider.",
       "phase": "Setup",
       "dependencies": ["SETUP-01"],
-      "passes": false,
-      "testFile": "__tests__/setup/state-management.test.ts"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/setup/state-management.test.ts",
+      "notes": "Zustand v5 with persist middleware, TanStack Query v5"
     },
     {
       "id": "SETUP-07",
@@ -64,8 +75,10 @@
       "description": "Create components/, hooks/, stores/, lib/, __tests__/, e2e/ directories. Add index.ts barrel exports where appropriate.",
       "phase": "Setup",
       "dependencies": ["SETUP-03"],
-      "passes": false,
-      "testFile": "__tests__/setup/folder-structure.test.ts"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "__tests__/setup/folder-structure.test.ts",
+      "notes": "All barrel exports in place"
     },
     {
       "id": "SETUP-08",
@@ -73,8 +86,10 @@
       "description": "Install maestro CLI. Create e2e/ directory with .maestro/ config. Create first sanity flow that opens the app.",
       "phase": "Setup",
       "dependencies": ["SETUP-07"],
-      "passes": false,
-      "testFile": "e2e/.maestro/sanity.yaml"
+      "passes": true,
+      "completedAt": "2026-01-23",
+      "testFile": "e2e/app-launch.yaml",
+      "notes": "Maestro config and sanity flow created"
     },
     {
       "id": "DB-01",

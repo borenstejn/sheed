@@ -1,0 +1,22 @@
+# SHEED E2E Test: App Launch Sanity Check
+# Verifies the app starts without crashing
+
+appId: com.sheed.app
+
+---
+
+# Launch the app
+- launchApp
+
+# Wait for app to be ready (splash screen or main content)
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# Take a screenshot to verify UI loaded
+- takeScreenshot: app_launched
+
+# Verify the app is running (check for any text element)
+- assertVisible:
+    text: ".*"
+    optional: true

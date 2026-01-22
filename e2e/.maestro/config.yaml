@@ -1,0 +1,19 @@
+# Maestro configuration for SHEED E2E tests
+# https://maestro.mobile.dev/
+
+appId: com.sheed.app
+
+# Default flow settings
+flows:
+  - "*"
+
+# Environment variables
+env:
+  APP_NAME: SHEED
+
+# Screenshots on failure
+onFlowComplete:
+  - takeScreenshot: flow_complete
+
+onFlowError:
+  - takeScreenshot: error_screenshot
