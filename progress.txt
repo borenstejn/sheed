@@ -10,3 +10,13 @@
 - Tech stack: Expo + Supabase + NativeWind
 - TDD approach: RED -> GREEN -> REFACTOR
 
+[2026-01-22 22:55] DB-SETUP: Supabase database schema applied (pre-Ralph)
+- Project: sheed-v3 (gazxwakudkeyonqwciyl)
+- Reset existing tables and applied fresh schema from PRD
+- Created 6 tables: users, contacts, sheeds, chatrooms, messages, notifications
+- Created 4 ENUM types: sheed_status, chatroom_type, message_type, notification_type
+- Created 3 triggers: updated_at, message_count, last_message
+- Applied RLS policies on all tables
+- 9 migrations recorded in Supabase
+- Environment files created: .env.example, .env.local
+

@@ -82,7 +82,9 @@
       "description": "Create supabase/migrations/001_enums.sql with sheed_status, chatroom_type, message_type, notification_type ENUMs as specified in PRD.",
       "phase": "Database",
       "dependencies": ["SETUP-05"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/enums.test.ts"
     },
     {
@@ -91,7 +93,9 @@
       "description": "Create supabase/migrations/002_users.sql with users table including auth_id, profile fields, gamification counters, and indexes.",
       "phase": "Database",
       "dependencies": ["DB-01"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/users-table.test.ts"
     },
     {
@@ -100,7 +104,9 @@
       "description": "Create supabase/migrations/003_contacts.sql with contacts table, owner_id FK, contact_user_id FK, unique constraints and indexes.",
       "phase": "Database",
       "dependencies": ["DB-02"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/contacts-table.test.ts"
     },
     {
@@ -109,7 +115,9 @@
       "description": "Create supabase/migrations/004_sheeds.sql with sheeds table, 3 participant FKs, intro_message, status, expires_at, constraints and indexes.",
       "phase": "Database",
       "dependencies": ["DB-02"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/sheeds-table.test.ts"
     },
     {
@@ -118,7 +126,9 @@
       "description": "Create supabase/migrations/005_chatrooms.sql with chatrooms table, sheed_id FK, type ENUM, participant FKs, indexes.",
       "phase": "Database",
       "dependencies": ["DB-04"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/chatrooms-table.test.ts"
     },
     {
@@ -127,7 +137,9 @@
       "description": "Create supabase/migrations/006_messages.sql with messages table, chatroom_id FK, sender_id FK, content, type, timestamps, indexes.",
       "phase": "Database",
       "dependencies": ["DB-05"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/messages-table.test.ts"
     },
     {
@@ -136,7 +148,9 @@
       "description": "Create supabase/migrations/007_notifications.sql with notifications table, user_id FK, type ENUM, title, body, data JSON, read_at.",
       "phase": "Database",
       "dependencies": ["DB-02"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/notifications-table.test.ts"
     },
     {
@@ -145,7 +159,9 @@
       "description": "Create supabase/migrations/008_rls.sql with Row Level Security policies. Critical: Sheeder cannot read sheede_sheede chatroom messages!",
       "phase": "Database",
       "dependencies": ["DB-07"],
-      "passes": false,
+      "passes": true,
+      "completedAt": "2026-01-22",
+      "notes": "Applied via Supabase MCP before Ralph loop",
       "testFile": "__tests__/db/rls-policies.test.ts"
     },
     {

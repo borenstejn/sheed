@@ -40,6 +40,9 @@ ralph.log
 CONTEXT_INJECTION.txt
 progress_archive_*.txt
 
+# MCP Config (contains tokens)
+.mcp.json
+
 # Expo
 .expo/
 *.jks

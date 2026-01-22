@@ -263,6 +263,20 @@ describe('useSheeds', () => {
 
 ## Supabase Patterns
 
+### MCP Server (IMPORTANT)
+
+Un serveur MCP PostgreSQL est configure pour Supabase. Utilisez-le pour :
+- Executer des requetes SQL directement
+- Verifier le schema des tables
+- Debugger les migrations
+
+**Le MCP est disponible via `@modelcontextprotocol/server-postgres`.**
+
+Pour les migrations, privilegiez toujours :
+1. Creer le fichier SQL dans `supabase/migrations/`
+2. Tester via MCP ou `supabase db push`
+3. Generer les types TypeScript
+
 ### Database Types (CRITICAL)
 
 **NEVER manually define interfaces for database tables.** Always use the generated types.
