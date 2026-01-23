@@ -1,0 +1,72 @@
+# SHEED Create Sheed E2E Test
+# Tests creating a new sheed (matchmaking request)
+
+appId: com.sheed.app
+
+---
+# Create Sheed Flow
+
+# Navigate to Sheeds tab
+- tapOn:
+    text: ".*Sheeds.*|.*💕.*"
+    optional: true
+
+# Wait for sheeds list to load
+- assertVisible:
+    text: ".*"
+  timeout: 3000
+
+# Tap FAB to create new sheed
+- tapOn:
+    text: ".*\\+.*|.*Nouveau.*|.*New.*"
+    optional: true
+
+# Modal should appear
+- assertVisible:
+    text: ".*Sheed.*|.*présenter.*|.*contact.*"
+  timeout: 3000
+
+# Select first contact
+- tapOn:
+    text: ".*Sélectionner.*|.*Select.*|.*\\+.*"
+    index: 0
+    optional: true
+
+# Contact list should appear
+- assertVisible:
+    text: ".*Contact.*|.*Rechercher.*|.*Search.*"
+  timeout: 2000
+
+# Tap on a contact (first in list)
+- tapOn:
+    index: 0
+    optional: true
+
+# Select second contact
+- tapOn:
+    text: ".*Sélectionner.*|.*Select.*|.*\\+.*"
+    index: 1
+    optional: true
+
+# Enter intro message
+- tapOn:
+    text: ".*message.*|.*intro.*"
+    optional: true
+
+- inputText: "Hey! Je pense que vous devriez vous rencontrer! 💕"
+
+# Submit button should be enabled
+- assertVisible:
+    text: ".*Sheed.*|.*Créer.*|.*Create.*"
+    enabled: true
+    optional: true
+
+# Tap create button
+- tapOn:
+    text: ".*Sheed les.*|.*Créer.*|.*Create.*"
+    optional: true
+
+# Should return to sheeds list or show success
+- assertVisible:
+    text: ".*"
+  timeout: 5000

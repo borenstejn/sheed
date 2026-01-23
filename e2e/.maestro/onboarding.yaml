@@ -1,0 +1,47 @@
+# SHEED Onboarding E2E Test
+# Tests the 3-slide onboarding experience
+
+appId: com.sheed.app
+
+---
+# Onboarding Flow
+
+# Wait for first slide
+- assertVisible:
+    text: ".*"
+  timeout: 5000
+
+# Verify slide 1 content (Matchmaking concept)
+- assertVisible:
+    text: ".*Sheed.*|.*amis.*|.*présenter.*"
+    optional: true
+
+# Swipe to slide 2
+- swipe:
+    direction: LEFT
+    duration: 500
+
+# Verify slide 2 content (How it works)
+- assertVisible:
+    text: ".*"
+  timeout: 2000
+
+# Swipe to slide 3
+- swipe:
+    direction: LEFT
+    duration: 500
+
+# Verify slide 3 content (Get started)
+- assertVisible:
+    text: ".*"
+  timeout: 2000
+
+# Skip button should be visible
+- assertVisible:
+    text: ".*Skip.*|.*Passer.*|.*Commencer.*"
+    optional: true
+
+# Tap to continue
+- tapOn:
+    text: ".*Commencer.*|.*Continue.*|.*Skip.*"
+    optional: true

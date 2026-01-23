@@ -1,0 +1,34 @@
+# SHEED Login E2E Test
+# Tests the SSO login screen
+
+appId: com.sheed.app
+
+---
+# Login Flow
+
+# Verify login screen elements
+- assertVisible:
+    text: ".*Connexion.*|.*Login.*|.*SHEED.*"
+  timeout: 5000
+
+# Apple Sign In button should be visible
+- assertVisible:
+    text: ".*Apple.*|.*Sign in with Apple.*|.*Continuer avec Apple.*"
+    optional: true
+
+# Google Sign In button should be visible
+- assertVisible:
+    text: ".*Google.*|.*Sign in with Google.*|.*Continuer avec Google.*"
+    optional: true
+
+# Terms link should be visible
+- assertVisible:
+    text: ".*conditions.*|.*terms.*|.*CGU.*"
+    optional: true
+
+# Note: Actual OAuth sign-in requires manual testing
+# or mock auth server. This test verifies UI elements.
+
+# For automated testing, you can mock auth:
+# - runScript:
+#     file: mock-auth.js

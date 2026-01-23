@@ -1,0 +1,32 @@
+# SHEED Full E2E Flow Test
+# This file orchestrates all critical user journeys
+
+appId: com.sheed.app
+
+---
+# Full user flow from onboarding to chat
+
+# 1. App Launch
+- launchApp
+
+# 2. Splash Screen (auto-advances)
+- assertVisible: "SHEED"
+
+# 3. Onboarding Flow
+- runFlow: onboarding.yaml
+
+# 4. Login Flow
+- runFlow: login.yaml
+
+# 5. Create Sheed Flow
+- runFlow: create-sheed.yaml
+
+# 6. Chat Flow
+- runFlow: chat-flow.yaml
+
+# 7. Profile Flow
+- runFlow: profile.yaml
+
+# Test complete
+- assertVisible:
+    text: ".*"

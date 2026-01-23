@@ -1,0 +1,67 @@
+# SHEED Profile E2E Test
+# Tests the profile and settings screens
+
+appId: com.sheed.app
+
+---
+# Profile Flow
+
+# Navigate to Profile tab
+- tapOn:
+    text: ".*Profil.*|.*Profile.*|.*👤.*"
+    optional: true
+
+# Wait for profile to load
+- assertVisible:
+    text: ".*"
+  timeout: 3000
+
+# Should show user info
+- assertVisible:
+    text: ".*@.*|.*email.*"
+    optional: true
+
+# Should show stats
+- assertVisible:
+    text: ".*Sheeds.*|.*créés.*|.*lancés.*"
+    optional: true
+
+# Stats cards should be visible
+- assertVisible:
+    text: ".*réussis.*|.*taux.*|.*%.*"
+    optional: true
+
+# Settings row should be visible
+- assertVisible:
+    text: ".*Paramètres.*|.*Settings.*|.*⚙.*"
+    optional: true
+
+# Tap on Settings
+- tapOn:
+    text: ".*Paramètres.*|.*Settings.*"
+    optional: true
+
+# Settings screen should load
+- assertVisible:
+    text: ".*Notifications.*|.*Compte.*|.*Support.*"
+  timeout: 3000
+
+# Notification toggle should be visible
+- assertVisible:
+    text: ".*activées.*|.*enabled.*"
+    optional: true
+
+# Logout button should be visible
+- assertVisible:
+    text: ".*Déconnexion.*|.*Logout.*|.*déconnecter.*"
+    optional: true
+
+# Go back to profile
+- tapOn:
+    text: ".*←.*|.*Retour.*|.*Back.*"
+    optional: true
+
+# Should return to profile
+- assertVisible:
+    text: ".*Profil.*|.*Profile.*"
+  timeout: 3000

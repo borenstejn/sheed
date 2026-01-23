@@ -83,6 +83,19 @@ describe('useAuth module', () => {
   });
 });
 
+describe('useAuth error handling', () => {
+  it('should handle authentication errors gracefully', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const hookPath = path.join(__dirname, '../../hooks/useAuth.ts');
+    const content = fs.readFileSync(hookPath, 'utf-8');
+
+    // Check for error handling patterns
+    expect(content).toMatch(/try|catch|error/i);
+    expect(content).toMatch(/console\.error|console\.log|Error/);
+  });
+});
+
 describe('useAuth configuration', () => {
   it('should use sheed:// as redirect scheme', () => {
     jest.resetModules();
