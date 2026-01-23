@@ -1,12 +1,14 @@
 import { Stack } from 'expo-router';
+import { View } from 'react-native';
 
 export default function MainLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: '#101012' },
-      }}
-    />
+    <View style={{ flex: 1, backgroundColor: '#101012' }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </View>
   );
 }
