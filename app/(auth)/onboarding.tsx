@@ -8,6 +8,7 @@ import {
   Pressable,
   Animated,
   ViewToken,
+  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 
@@ -60,7 +61,13 @@ export default function OnboardingScreen() {
 
   const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+      const nextIndex = currentIndex + 1;
+      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+      // On web, scrollToIndex may not trigger onViewableItemsChanged
+      // Manually update state as fallback
+      if (Platform.OS === 'web') {
+        setCurrentIndex(nextIndex);
+      }
     } else {
       router.replace('/(auth)/login');
     }
@@ -114,37 +121,50 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
       {/* Skip button */}
-      <Pressable style={styles.skipButton} onPress={handleSkip}>
+      <Pressable
+        style={[styles.skipButton, Platform.OS === 'web' && { cursor: 'pointer' } as any]}
+        onPress={handleSkip}
+      >
         <Text style={styles.skipText}>Skip</Text>
       </Pressable>
 
-      {/* Slides */}
-      <FlatList
-        ref={flatListRef}
-        data={SLIDES}
-        renderItem={renderSlide}
-        keyExtractor={(item) => item.id}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        scrollEventThrottle={16}
-      />
+      {/* Slides area */}
+      <View style={styles.slidesContainer}>
+        <FlatList
+          ref={flatListRef}
+          data={SLIDES}
+          renderItem={renderSlide}
+          keyExtractor={(item) => item.id}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: false }
+          )}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          scrollEventThrottle={16}
+          style={styles.flatList}
+          contentContainerStyle={styles.flatListContent}
+        />
+      </View>
 
-      {/* Dots indicator */}
-      {renderDots()}
+      {/* Bottom section - outside FlatList area */}
+      <View style={styles.bottomSection}>
+        {/* Dots indicator */}
+        {renderDots()}
 
-      {/* Next/Get Started button */}
-      <Pressable style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.nextText}>
-          {currentIndex === SLIDES.length - 1 ? "Let's Go!" : 'Next'}
-        </Text>
-      </Pressable>
+        {/* Next/Get Started button */}
+        <Pressable
+          style={[styles.nextButton, Platform.OS === 'web' && { cursor: 'pointer' } as any]}
+          onPress={handleNext}
+        >
+          <Text style={styles.nextText}>
+            {currentIndex === SLIDES.length - 1 ? "Let's Go!" : 'Next'}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -159,17 +179,30 @@ const styles = StyleSheet.create({
     top: 60,
     right: 24,
     zIndex: 10,
+    padding: 8,
   },
   skipText: {
     color: '#8A8A8E',
     fontSize: 16,
   },
+  slidesContainer: {
+    flex: 1,
+    marginTop: 100,
+  },
+  flatList: {
+    flex: 1,
+  },
+  flatListContent: {
+    alignItems: 'center',
+  },
   slide: {
     width,
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
+  },
+  bottomSection: {
+    paddingBottom: 48,
   },
   emoji: {
     fontSize: 80,
@@ -192,7 +225,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
   },
   dot: {
     height: 8,
@@ -202,7 +235,6 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     marginHorizontal: 24,
-    marginBottom: 48,
     backgroundColor: '#FF3B7A',
     borderRadius: 16,
     paddingVertical: 16,
